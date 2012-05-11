@@ -1,11 +1,28 @@
 #ifndef SENSOR_H
 #define SENSOR_H
 
+#include <pthread.h>
+
+//mock Controller class
+class Controller {
+private:
+    int sensorFlags;
+public:
+    Controller() { sensorFlags = 0; }
+
+    void setSensorFlag(int flagPosition) {
+
+        sensorFlags |= 1 << flagPosition;
+
+        std::cout << "\nFlag set: " << flagPosition << "\n";
+    };
+};
+
 class Sensor {
 
 private:
     char                trigger;
-    Controller          target;
+    Controller          *target;
     int                 flagPosition; 
 
     pthread_t           *thread;
@@ -16,16 +33,17 @@ public:
     Sensor();
 
     //use this constructor
-    Sensor(Controller target, char trigger, int flagPosition) 
-        {target = target, trigger = trigger, flagPosition = flagPosition,
-         thread = NULL, threadAttributes = NULL; }
+    Sensor(Controller *target, char trigger, int flagPosition);
 
     ~Sensor();
 
-private:
-    //private method - listens for simulated sensor input in another thread
-    void listen(void *args);
+    void checkTrigger(char received);
 
 };
+
+
+namespace sensor_util {
+    void *listen(void *args);
+}
 
 #endif
