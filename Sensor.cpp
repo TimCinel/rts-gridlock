@@ -5,12 +5,13 @@ Sensor::Sensor() {
     throw "Specify target, trigger, and flagPosition when instantiating Sensor";
 }
 
-Sensor::Sensor(Controller *target, char trigger, int flagPosition) {
+Sensor::Sensor(Controller *target, char trigger, int flagPosition, int readFd) :
+        target(target), trigger(trigger), flagPosition(flagPosition), 
+        readFd(readFd) {
 
     std::cout << "Creating....\n";
 
     this->thread = new pthread_t;
-    this->threadAttributes = new pthread_attr_t;
 
     //spin up a new thread    
     if (pthread_create(this->thread, NULL, sensor_util::listen, this) != 0)
@@ -27,8 +28,8 @@ Sensor::~Sensor() {
     if (this->thread)
         delete(this->thread);
 
-    if (this->threadAttributes)
-        delete(this->threadAttributes);
+    if (this->threadAttr)
+        delete(this->threadAttr);
 
 }
 
@@ -42,12 +43,11 @@ void *sensor_util::listen(void *args) {
     char buff;
     Sensor *sensor = (Sensor *)args;
 
-    std::cout << "Listening!\n";
+    std::cout << "Listening for " << sensor->getTrigger() << "!\n";
 
-    while (read(STDIN_FILENO, &buff, 1) > 0) {
-        std::cout << "Got: " << buff << "\n";
+    while (read(sensor->getReadFd(), &buff, 1) > 0) {
         sensor->checkTrigger(buff);
     }
 
-    std::cout << "Done Listening!\n";
+    std::cout << "Done Listening for " << sensor->getTrigger() << "!\n";
 }

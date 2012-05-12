@@ -21,21 +21,24 @@ public:
 class Sensor {
 
 private:
-    char                trigger;
-    Controller          *target;
-    int                 flagPosition; 
+    char                trigger;        //character to detect when input is read
+    Controller          *target;        //controller to set flag on
+    int                 flagPosition;   //flag to set when trigger is detected
+    int                 readFd;         //file descriptor to read on
 
-    pthread_t           *thread;
-    pthread_attr_t      *threadAttributes;
+    pthread_t           *thread;    
+    pthread_attr_t      *threadAttr;
 
 
 public:
     Sensor();
 
     //use this constructor
-    Sensor(Controller *target, char trigger, int flagPosition);
-
+    Sensor(Controller *target, char trigger, int flagPosition, int readFd);
     ~Sensor();
+
+    int getReadFd() {return this->readFd;}
+    int getTrigger() {return this->trigger;}
 
     void checkTrigger(char received);
 
