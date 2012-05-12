@@ -1,22 +1,14 @@
 #ifndef SENSOR_H
 #define SENSOR_H
 
+#ifndef MOCK_OBJECTS
+#include "Controller.h"
+#else
+#include "test/mock_Controller.h"
+#endif
+
 #include <pthread.h>
 
-//mock Controller class
-class Controller {
-private:
-    int sensorFlags;
-public:
-    Controller() { sensorFlags = 0; }
-
-    void setSensorFlag(int flagPosition) {
-
-        sensorFlags |= 1 << flagPosition;
-
-        std::cout << "\nFlag set: " << flagPosition << "\n";
-    };
-};
 
 class Sensor {
 

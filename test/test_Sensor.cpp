@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <iostream>
 #include "../Sensor.h"
+#include "mock_Controller.h"
 
 
 int main(void) {
