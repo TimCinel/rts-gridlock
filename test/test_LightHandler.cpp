@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
 
     handler->printState();
 
-    handler->setState(1 << light::CAR_STRAIGHT_GO | 1 << light::PEDESTRIAN_STOP, 1 << light::PEDESTRIAN_STOP);
+    handler->setState(bit(light::CAR_STRAIGHT_GO) | bit(light::PEDESTRIAN_STOP), bit(light::PEDESTRIAN_STOP));
 
     printf("\n\nLights: ");
     printBinary(handler->getLights());
@@ -29,5 +29,3 @@ int main(int argc, char **argv) {
 
     return 0;
 }
-
-

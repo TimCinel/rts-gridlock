@@ -1,6 +1,7 @@
 #ifndef LIGHTHANDLER_H
 #define LIGHTHANDLER_H
 
+#define bit(x)              (1 << (x))
 namespace light {
     enum lightOption {
         CAR_STRAIGHT_STOP,
@@ -29,6 +30,8 @@ namespace light {
 
 }
 
+using namespace light;
+
 class LightHandler {
 private:
 
@@ -38,12 +41,13 @@ private:
     int flashFlags;
 
 public:
-    static const int CAR_STRAIGHT = 1 << light::CAR_STRAIGHT_GO | 
-                                    1 << light::CAR_STRAIGHT_FINISH | 
-                                    1 << light::CAR_STRAIGHT_STOP;
 
-    static const int PEDESTRIAN =   1 << light::PEDESTRIAN_GO | 
-                                    1 << light::PEDESTRIAN_STOP;
+    static const int CAR_STRAIGHT = bit(CAR_STRAIGHT_GO) | 
+                                    bit(CAR_STRAIGHT_FINISH) | 
+                                    bit(CAR_STRAIGHT_STOP);
+
+    static const int PEDESTRIAN =   bit(PEDESTRIAN_GO) | 
+                                    bit(PEDESTRIAN_STOP);
 
     LightHandler();
     LightHandler(int lightConfiguration);
