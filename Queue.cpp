@@ -3,8 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-Queue::Queue(char* name) {
-
+Queue::Queue(char* name, AbstractController* controller) {
+    strcpy(this->name, name);
+    this->controller = controller;
+    
     attr.mq_maxmsg = 100;
     attr.mq_msgsize = MESSAGESIZE;
     attr.mq_flags = 0;
@@ -19,7 +21,7 @@ Queue::~Queue() {
 }
 
 
-void Queue::Read(char *name) {
+void Queue::Read() {
 
 	if ((qr = mq_open(name, O_RDONLY)) != -1)
 	{
@@ -28,7 +30,16 @@ void Queue::Read(char *name) {
 				attr.mq_maxmsg, attr.mq_msgsize, attr.mq_curmsgs);
 		while (mq_receive(qr, buf, MESSAGESIZE, NULL) > 0)
 		{
-			printf("dequeue: '%s'\n", buf);
+			//printf("dequeue: '%s'\n", buf);
+
+			if (strcmp(buf, "CMD_MODE") == 0)
+			    controller->setFlag(CMD_MODE);
+			else if (strcmp(buf, "TIMER_MODE") == 0)
+			    controller->setFlag(TIMER_MODE);
+			else if (strcmp(buf, "SENSOR_MODE") == 0)
+			    controller->setFlag(SENSOR_MODE);
+			else
+			    std::cout << "Error! Invalid message received\n";
 		}
 	}
     
