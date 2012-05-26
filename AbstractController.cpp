@@ -1,5 +1,11 @@
 #include "AbstractController.h"
 
+void AbstractController::init(char* queueName)
+{
+   t = INIT_T;
+   queue = new Queue(queueName);
+}
+
 State AbstractController::nextState()
 {
    switch (s)
@@ -65,13 +71,13 @@ State AbstractController::nextState()
    }
 }
 
-void AbstractController::tick()
-{
-   t--;
-   nextState();
-}
-
 State AbstractController::getState()
 {
    return s;
+}
+
+void AbstractController::tick()
+{
+   t--;
+   trigger();
 }
