@@ -80,6 +80,9 @@ typedef state State;
 
 #define INIT_T 0
 
+#define SET 0
+#define RESET 1
+
 class AbstractController
 {
    /*constructor*/
@@ -93,6 +96,7 @@ class AbstractController
       State nextState();
       State getState();
       void tick();
+      void setFlag(int);
 
    /*instance variables*/
    private:
