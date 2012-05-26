@@ -8,6 +8,10 @@ void AbstractController::init(char* queueName)
 
 State AbstractController::nextState()
 {
+   
+}
+
+/*{
    switch (s)
    {
       case (STARTUP)
@@ -69,7 +73,7 @@ State AbstractController::nextState()
          
          break;
    }
-}
+}*/
 
 State AbstractController::getState()
 {
@@ -80,4 +84,9 @@ void AbstractController::tick()
 {
    t--;
    trigger();
+}
+
+void AbstractController::setFlag(int flag)
+{
+   flags[flag] = SET;
 }
