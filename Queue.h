@@ -16,11 +16,13 @@
 
 #include <mqueue.h>
 #include <sys/stat.h>
+#include "AbstractController.h"
 
 #define MESSAGESIZE 40
 #define Q_FLAGS     O_RDWR | O_CREAT
 #define Q_PERM      S_IRUSR | S_IWUSR | S_IROTH
 
+#define NAMESIZE 20
 
 class Queue {
 
@@ -28,7 +30,8 @@ class Queue {
        mqd_t    qd;
        mqd_t    qr;                     // queue for receiving
        char     buf[MESSAGESIZE];       //message being passed
-       char*    name;
+       char     name[NAMESIZE];
+       AbstractController* controller;
 
        struct mq_attr attr;
 
