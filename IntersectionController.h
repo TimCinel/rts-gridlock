@@ -3,8 +3,6 @@
 
 #include "AbstractController.h"
 
-#include "StateRecord.h"
-
 class IntersectionController : public AbstractController
 {
    /*constructor*/
@@ -15,9 +13,30 @@ class IntersectionController : public AbstractController
       virtual void trigger();
       void display();
 
+
    /*instance variables*/
    private:
-      void[CONTROLLER_STATE_SENTINAL] *stateRecord;
+      /* a CONTROLLER_STATE_SENTINAL-element array of function pointers */
+      void *(IntersectionController::*stateRecord[CONTROLLER_STATE_SENTINAL])();
+
+  /*state functions */
+        void *startup();
+        void *ns_clear();
+        void *ns_tram_g();
+        void *ns_tram_f();
+        void *ns_straight();
+        void *ns_straight_g_ped_g();
+        void *ns_straight_g_ped_f();
+        void *ns_straight_g();
+        void *ns_straight_f();
+        void *ew_clear();
+        void *ew_both_right_g();
+        void *ew_both_right_f();
+        void *ew_straight();
+        void *ew_straight_g_ped_g();
+        void *ew_straight_g_ped_f();
+        void *ew_straight_g();
+        void *ew_straight_f();
       
 };
 
