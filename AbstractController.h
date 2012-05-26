@@ -1,72 +1,6 @@
 #ifndef ABSTRACTCONTROLLER
 #define ABSTRACTCONTROLLER
 
-/*bitwise states*/
-/*all lights*/
-#define STARTUP 010101010
-#define STARTUP_F 010001010
-#define NS_CLEAR 000100001
-/*#define NS_CLEAR_F 000000000*/
-#define NS_STRAIGHT 000100001
-/*#define NS_STRAIGHT_F 000000000*/
-#define EW_CLEAR 000100001
-/*#define EW_CLEAR_F 000000000*/
-#define EW_STRAIGHT 000100001
-/*#define EW_STRAIGHT_F 000000000*/
-#define OTHER_FLASH 000000000
-
-/*north-south lights*/
-#define NS_TRAM_G_NS 100100001
-/*#define NS_TRAM_G_F_NS 000000000*/
-#define NS_TRAM_F_NS 010100001
-/*#define NS_TRAM_F_F_NS 000000000*/
-#define NS_STRAIGHT_G_PED_G_NS 001000100
-/*#define NS_STRAIGHT_G_PED_G_F_NS 000000000*/
-#define NS_STRAIGHT_G_PED_F_NS 000100100
-#define NS_STRAIGHT_G_PED_F_F_NS 000100000
-#define NS_STRAIGHT_G_NS 000100100
-/*#define NS_STRAIGHT_G_F_NS 000000000*/
-#define NS_STRAIGHT_F_NS 000100010
-/*#define NS_STRAIGHT_F_F_NS 000000000*/
-#define EW_STRAIGHT_G_PED_G_NS 000100001
-/*#define EW_STRAIGHT_G_PED_G_F_NS 000000000*/
-#define EW_STRAIGHT_G_PED_F_NS 000100001
-/*#define EW_STRAIGHT_G_PED_F_F_NS 000000000*/
-#define EW_BOTH_RIGHT_G_NS 000100001
-/*#define EW_BOTH_RIGHT_G_F_NS 000000000*/
-#define EW_BOTH_RIGHT_F_NS 000100001
-/*#define EW_BOTH_RIGHT_F_F_NS 000000000*/
-#define EW_STRAIGHT_G_NS 000100001
-/*#define EW_STRAIGHT_G_F_NS 000000000*/
-#define EW_STRAIGHT_F_NS 000100001
-/*#define EW_STRAIGHT_F_F_NS 000000000*/
-
-/*east-west lights*/
-#define NS_TRAM_G_EW 000100001
-/*#define NS_TRAM_G_F_EW 000000000*/
-#define NS_TRAM_F_EW 000100001
-/*#define NS_TRAM_F_F_EW 000000000*/
-#define NS_STRAIGHT_G_PED_G_EW 000100001
-/*#define NS_STRAIGHT_G_PED_G_F_EW 000000000*/
-#define NS_STRAIGHT_G_PED_F_EW 000100001
-/*#define NS_STRAIGHT_G_PED_F_F_EW 000000000*/
-#define NS_STRAIGHT_G_EW 000100001
-/*#define NS_STRAIGHT_G_F_EW 000000000*/
-#define NS_STRAIGHT_F_EW 000100001
-/*#define NS_STRAIGHT_F_F_EW 000000000*/
-#define EW_STRAIGHT_G_PED_G_EW 001000100
-/*#define EW_STRAIGHT_G_PED_G_F_EW 000000000*/
-#define EW_STRAIGHT_G_PED_F_EW 000100100
-#define EW_STRAIGHT_G_PED_F_F_EW 000100000
-#define EW_BOTH_RIGHT_G_EW 000110000
-/*#define EW_BOTH_RIGHT_G_F_EW 000000000*/
-#define EW_BOTH_RIGHT_F_EW 000101000
-/*#define EW_BOTH_RIGHT_F_F_EW 000000000*/
-#define EW_STRAIGHT_G_EW 000100100
-/*#define EW_STRAIGHT_G_F_EW 000000000*/
-#define EW_STRAIGHT_F_EW 000100010
-/*#define EW_STRAIGHT_F_F_EW 000000000*/
-
 namespace ControllerStates {
 /*state format: NSCar|NSTram|NSPed|EWCar|EWCarTurning|EWPed*/
 /*state values: R - Red, A - Amber, G - Green, F - Flashing (Amber for Car, Red for Ped), C - Cleared (not on), W - White (tram only)*/
@@ -77,7 +11,6 @@ namespace ControllerStates {
         NS_TRAM_F,
         NS_STRAIGHT,
         NS_STRAIGHT_G_PED_G,
-        NS_STRAIGHT_G_PED_F,
         NS_STRAIGHT_G_PED_F,
         NS_STRAIGHT_G,
         NS_STRAIGHT_F,
@@ -118,8 +51,10 @@ namespace ControllerFlags {
         COMMAND_MODE,
         SENSOR_MODE,
         TIMER_MODE
-    }
-}
+    };
+};
+
+using namespace ControllerStates;
 
 class AbstractController
 {
@@ -130,13 +65,13 @@ class AbstractController
    /*functions*/
    public:
       virtual void trigger() = 0;
-      State nextState();
-      State getState();
+      controllerState nextState();
+      controllerState getState();
       void tick();
 
    /*instance variables*/
    private:
-      State s;
+      controllerState s;
       unsigned int t;
 };
 
