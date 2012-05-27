@@ -1,6 +1,8 @@
 #include "../LightHandler.cpp"
 #include <stdio.h>
 
+using namespace Light;
+
 void printBinary(int subject) {
     for (int i = 0; i < sizeof(int) * 8; i++) {
         printf("%d", (subject << i) & 1);
@@ -10,8 +12,8 @@ void printBinary(int subject) {
 int main(int argc, char **argv) {
 
     LightHandler *handler = new LightHandler(
-            LightHandler::CAR_STRAIGHT | 
-            LightHandler::PEDESTRIAN
+            CAR_STRAIGHT | 
+            PEDESTRIAN
             );
     printf("Configuration: ");
     printBinary(handler->getConfiguration());
@@ -19,7 +21,7 @@ int main(int argc, char **argv) {
 
     handler->printState();
 
-    handler->setState(bit(light::CAR_STRAIGHT_GO) | bit(light::PEDESTRIAN_STOP), bit(light::PEDESTRIAN_STOP));
+    handler->setState(bit(CAR_STRAIGHT_GO) | bit(PEDESTRIAN_STOP), bit(PEDESTRIAN_STOP));
 
     printf("\n\nLights: ");
     printBinary(handler->getLights());

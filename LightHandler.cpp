@@ -1,39 +1,66 @@
 #include "LightHandler.h"
 #include <stdio.h>
 
-LightHandler::LightHandler() {
+namespace Light
+{
+    //mainly for debug purposes
+    const char *lightOptionNames[] = 
+    {
+        "CAR_STRAIGHT_STOP",
+        "CAR_STRAIGHT_FINISH",
+        "CAR_STRAIGHT_GO",
+        "CAR_RIGHT_FINISH",
+        "CAR_RIGHT_GO",
+        "PEDESTRIAN_STOP",
+        "PEDESTRIAN_GO",
+        "TRAM_FINISH",
+        "TRAM_GO"
+    };
+}
+
+using namespace Light;
+
+LightHandler::LightHandler()
+{
     throw "Specify lightConfiguration when instantiating LightHandler";
 }
 
-LightHandler::LightHandler(int lightConfiguration) : 
-    lightConfiguration(lightConfiguration) {
-}
+LightHandler::LightHandler(lightString lightConfiguration) : 
+    lightConfiguration(lightConfiguration) 
+{}
 
-void LightHandler::setState(int lights, int flashes) {
+void LightHandler::setState(lightString lights, lightString flashes) 
+{
     //only enable lights that exist in this configuration
     this->lightFlags = this->lightConfiguration & lights;
     this->flashFlags = this->lightConfiguration & flashes;
 }
 
-int LightHandler::getConfiguration() {
+lightString LightHandler::getConfiguration() 
+{
     return this->lightConfiguration;
 }
 
-int LightHandler::getLights() {
+lightString LightHandler::getLights()
+{
     return this->lightFlags;
 }
 
-int LightHandler::getFlashes() {
+lightString LightHandler::getFlashes() 
+{
     return this->flashFlags;
 }
 
-void LightHandler::printState() {
-    for (int i = 0; i < 3; i++) {
+void LightHandler::printState()
+{
+    for (int i = 0; i < 3; i++)
+    {
 
         char *message, *positive, *negative;
-        int subject;
+        lightString subject;
 
-        switch (i) {
+        switch (i)
+        {
             case 0:
                 subject = this->lightConfiguration;
                 message = (char *)"= Light Configuration =";
@@ -57,12 +84,13 @@ void LightHandler::printState() {
         printf("%s (%d)\n", message, subject);
 
         int j = 0;
-        do {
+        do
+        {
             printf("\t%s: %s\n", 
-                    light::lightOptionNames[j], 
+                    lightOptionNames[j], 
                     (1 << j & subject ? positive : negative )
                   );
-        } while (++j < light::SENTINEL);
+        } while (++j < LIGHTOPTION_SENTINEL);
 
     }
 }
