@@ -1,11 +1,10 @@
 TARGET		:= rts
-SRCS		:= Sensor.cpp
-TESTSRCS	:= test/test_Sensor.cpp test/mock_Controller.h
+SRCS		:= $(wildcard *.cpp)
 OBJS		:= ${SRCS:.cpp=.o}
 
 
 CC     		:= g++
-CCFLAGS		:= -O0 
+CCFLAGS		:= -O0 -g
 LDFLAGS		:= 
 TESTFLAGS	:= -DMOCK_OBJECTS
 
@@ -18,10 +17,10 @@ ${OBJS}: %.o: %.cpp
 test_sensor: test/test_Sensor.cpp test/mock_Controller.h
 	${CC} ${CCFLAGS} ${TESTFLAGS} ${SRCS} test/test_Sensor.cpp test/mock_Controller.h -o test_sensor
 
-test_lighthandler: test/test_LightHandler.cpp
+test_lighthandler: test/test_LightHandler.cpp ${SRCS}
 	${CC} ${CCFLAGS} ${TESTFLAGS} ${SRCS} test/test_LightHandler.cpp -o test_lighthandler
 
-test_intersectioncontroller: test/test_IntersectionController.cpp IntersectionController.cpp
+test_intersectioncontroller: test/test_IntersectionController.cpp ${SRCS}
 	${CC} ${CCFLAGS} ${TESTFLAGS} IntersectionController.cpp test/test_IntersectionController.cpp -o test_intersectioncontroller
 
 clean:
