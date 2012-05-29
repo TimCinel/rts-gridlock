@@ -13,7 +13,7 @@ public:
 private:
     /*instance variables*/
     unsigned int s;
-    unsigned int t;
+    unsigned int time;
 
 };
 
