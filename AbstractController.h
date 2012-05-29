@@ -6,14 +6,20 @@ class AbstractController
 public:
     /*functions*/
     virtual void trigger() = 0;
-    unsigned int nextState();
-    unsigned int getState();
+    //unsigned int nextState();
+    //unsigned int getState();
     void tick();
+
+    inline void resetTimer(int time) { this->time = time; }
+    inline int getTime() { return this->time; }
+
+    virtual void setFlag(unsigned int flag) = 0;
+    virtual int getFlag(unsigned int flag) = 0;
 
 private:
     /*instance variables*/
-    unsigned int s;
-    unsigned int time;
+    int s;
+    int time;
 
 };
 
