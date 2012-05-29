@@ -4,7 +4,7 @@
 namespace Light
 {
     //mainly for debug purposes
-    const char *lightOptionNames[] = 
+    static const char *lightOptionNames[] = 
     {
         "CAR_STRAIGHT_STOP",
         "CAR_STRAIGHT_FINISH",

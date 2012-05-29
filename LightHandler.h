@@ -33,6 +33,9 @@ namespace Light {
     static const lightString PEDESTRIAN     = (1 << PEDESTRIAN_GO) | 
                                               (1 << PEDESTRIAN_STOP);
 
+    static const lightString ALL_STOP       = (1 << CAR_STRAIGHT_STOP) |
+                                              (1 << PEDESTRIAN_STOP);
+
     //for convenience (using inline instead of macro)
     inline unsigned int bit(unsigned int x) { return (1 << (x)); }
 
