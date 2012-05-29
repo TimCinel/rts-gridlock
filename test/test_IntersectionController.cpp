@@ -3,4 +3,9 @@
 
 int main() {
     IntersectionController *controller = new IntersectionController();
+
+    controller->trigger();
+    controller->trigger();
+    controller->trigger();
+    controller->trigger();
 }
