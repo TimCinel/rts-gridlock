@@ -4,10 +4,14 @@
 #include "AbstractController.h"
 #include "LightHandler.h"
 
-using namespace Light;
+#include <list>
 
-namespace ControllerStates 
+
+namespace ControllerInfo
 {
+
+    //STATE CONSTANTS
+
     typedef enum controllerState 
     {
         STARTUP,
@@ -30,34 +34,11 @@ namespace ControllerStates
         CONTROLLER_STATE_SENTINAL
     };
 
-    const lightString STARTUP_L_NS = (1 << CAR_STRAIGHT_FINISH);
-    const lightString STARTUP_L_EW = (1 << CAR_STRAIGHT_FINISH);
-    const lightString STARTUP_F_NS = (1 << CAR_STRAIGHT_FINISH);
-    const lightString STARTUP_F_EW = (1 << CAR_STRAIGHT_FINISH);
 
-        /*
-        NS_CLEAR,
-        NS_TRAM_G,
-        NS_TRAM_F,
-        NS_STRAIGHT,
-        NS_STRAIGHT_G_PED_G,
-        NS_STRAIGHT_G_PED_F,
-        NS_STRAIGHT_G,
-        NS_STRAIGHT_F,
-        EW_CLEAR,
-        EW_BOTH_RIGHT_G,
-        EW_BOTH_RIGHT_F,
-        EW_STRAIGHT,
-        EW_STRAIGHT_G_PED_G,
-        EW_STRAIGHT_G_PED_F,
-        EW_STRAIGHT_G,
-        EW_STRAIGHT_F,
-        */
+    //CONTROLLER CONSTANTS
 
-};
-
-namespace ControllerFlags {
-    typedef enum controllerFlag {
+    typedef enum controllerFlag 
+    {
         SYSTEM_MODE,
         CMD_EW_STRAIGHT,
         CMD_EW_PED,
@@ -82,9 +63,167 @@ namespace ControllerFlags {
         SENSOR_MODE,
         TIMER_MODE
     };
-};
 
-using namespace ControllerStates;
+
+    //TIME CONSTANTS
+
+    static const unsigned int T_STARTUP             = 15;
+
+    static const unsigned int T_NS_CLEAR            = 2;
+    static const unsigned int T_NS_STRAIGHT_G       = 20;
+    static const unsigned int T_NS_STRAIGHT_CHECK   = 5;
+    static const unsigned int T_NS_STRAIGHT_G_QUICK = 5;
+    static const unsigned int T_NS_STRAIGHT_F       = 4;
+    static const unsigned int T_NS_PED_G            = 20;
+    static const unsigned int T_NS_PED_F            = 15;
+
+    static const unsigned int T_EW_CLEAR            = 2;
+    static const unsigned int T_EW_BOTH_RIGHT_G     = 10;
+    static const unsigned int T_EW_BOTH_RIGHT_F     = 4;
+    static const unsigned int T_EW_STRAIGHT_G       = 20;
+    static const unsigned int T_EW_STRAIGHT_CHECK   = 5;
+    static const unsigned int T_EW_STRAIGHT_G_QUICK = 5;
+    static const unsigned int T_EW_STRAIGHT_F       = 20;
+    static const unsigned int T_EW_PED_G            = 20;
+    static const unsigned int T_EW_PED_F            = 15;
+
+
+    //LIGHT CONSTANTS
+
+    using namespace Light;
+
+    //light configurations
+
+    static const lightString I1_I3_NS_LIGHT_CONF =  CAR_STRAIGHT | 
+                                                    PEDESTRIAN;
+    static const lightString I1_I3_EW_LIGHT_CONF =  CAR_STRAIGHT |
+                                                    PEDESTRIAN |
+                                                    CAR_RIGHT;
+
+    static const lightString I2_NS_LIGHT_CONF    =  CAR_STRAIGHT |
+                                                    PEDESTRIAN |
+                                                    TRAM_STRAIGHT;
+    static const lightString I2_EW_LIGHT_CONF    =  CAR_STRAIGHT |
+                                                    PEDESTRIAN |
+                                                    CAR_RIGHT;
+
+    //light patterns for general traffic
+
+    static const lightString STARTUP_L_NS =         (1 << CAR_STRAIGHT_FINISH) | 
+                                                    (1 << PEDESTRIAN_STOP);
+    static const lightString STARTUP_L_EW =         (1 << CAR_STRAIGHT_FINISH) | 
+                                                    (1 << PEDESTRIAN_STOP);
+    static const lightString STARTUP_F_NS =         (1 << CAR_STRAIGHT_FINISH) | 
+                                                    (1 << PEDESTRIAN_STOP);
+    static const lightString STARTUP_F_EW =         (1 << CAR_STRAIGHT_FINISH) | 
+                                                    (1 << PEDESTRIAN_STOP);
+    
+    //light paterns for north-south 
+
+    static const lightString NS_CLEAR_L_NS =        ALL_STOP;
+    static const lightString NS_CLEAR_L_EW =        ALL_STOP;
+    static const lightString NS_CLEAR_F_NS =        0;
+    static const lightString NS_CLEAR_F_EW =        0;
+
+    static const lightString NS_TRAM_G_L_NS =       (1 << TRAM_GO) | 
+                                                    (1 << CAR_STRAIGHT_STOP) | 
+                                                    (1 << PEDESTRIAN_STOP);
+    static const lightString NS_TRAM_G_L_EW =       ALL_STOP;
+    static const lightString NS_TRAM_G_F_NS =       0;
+    static const lightString NS_TRAM_G_F_EW =       0;
+
+    static const lightString NS_TRAM_F_L_NS =       (1 << TRAM_FINISH) | 
+                                                    (1 << CAR_STRAIGHT_STOP) | 
+                                                    (1 << PEDESTRIAN_STOP);
+    static const lightString NS_TRAM_F_L_EW =       ALL_STOP;
+    static const lightString NS_TRAM_F_F_NS =       0;
+    static const lightString NS_TRAM_F_F_EW =       0;
+
+    static const lightString NS_STRAIGHT_L_NS =     ALL_STOP;
+    static const lightString NS_STRAIGHT_L_EW =     ALL_STOP;
+    static const lightString NS_STRAIGHT_F_NS =     0;
+    static const lightString NS_STRAIGHT_F_EW =     0;
+
+    static const lightString NS_STRAIGHT_G_PED_G_L_NS = (1 << CAR_STRAIGHT_GO) |
+                                                        (1 << PEDESTRIAN_GO);
+    static const lightString NS_STRAIGHT_G_PED_G_L_EW = ALL_STOP;
+    static const lightString NS_STRAIGHT_G_PED_G_F_NS = 0;
+    static const lightString NS_STRAIGHT_G_PED_G_F_EW = 0;
+
+    static const lightString NS_STRAIGHT_G_PED_F_L_NS = (1 << CAR_STRAIGHT_GO) |
+                                                        (1 << PEDESTRIAN_STOP);
+    static const lightString NS_STRAIGHT_G_PED_F_L_EW = ALL_STOP;
+    static const lightString NS_STRAIGHT_G_PED_F_F_NS = (1 << PEDESTRIAN_STOP);
+    static const lightString NS_STRAIGHT_G_PED_F_F_EW = 0;
+
+    static const lightString NS_STRAIGHT_G_L_NS =       (1 << CAR_STRAIGHT_GO) |
+                                                        (1 << PEDESTRIAN_STOP);
+    static const lightString NS_STRAIGHT_G_L_EW =       ALL_STOP;
+    static const lightString NS_STRAIGHT_G_F_NS =       0;
+    static const lightString NS_STRAIGHT_G_F_EW =       0;
+
+    static const lightString NS_STRAIGHT_F_L_NS =       (1 << CAR_STRAIGHT_FINISH) |
+                                                        (1 << PEDESTRIAN_STOP);
+    static const lightString NS_STRAIGHT_F_L_EW =       ALL_STOP;
+    static const lightString NS_STRAIGHT_F_F_NS =       0;
+    static const lightString NS_STRAIGHT_F_F_EW =       0;
+
+    
+    //light patterns for east-west traffic flow
+    
+    static const lightString EW_CLEAR_L_NS = (1 << CAR_STRAIGHT_FINISH) | 
+                                             (1 << PEDESTRIAN_STOP);
+    static const lightString EW_CLEAR_L_EW = (1 << CAR_STRAIGHT_FINISH) |
+                                             (1 << PEDESTRIAN_STOP);
+    static const lightString EW_CLEAR_F_NS = (1 << CAR_STRAIGHT_FINISH) |
+                                             (1 << PEDESTRIAN_STOP);
+    static const lightString EW_CLEAR_F_EW = (1 << CAR_STRAIGHT_FINISH) |
+                                             (1 << PEDESTRIAN_STOP);
+
+    static const lightString EW_BOTH_RIGHT_G_L_NS = ALL_STOP;
+    static const lightString EW_BOTH_RIGHT_G_L_EW = (1 << CAR_RIGHT_GO) |
+                                                    (1 << CAR_STRAIGHT_STOP) |
+                                                    (1 << PEDESTRIAN_STOP);
+    static const lightString EW_BOTH_RIGHT_G_F_NS = 0;
+    static const lightString EW_BOTH_RIGHT_G_F_EW = 0;
+
+    static const lightString EW_BOTH_RIGHT_F_L_NS = ALL_STOP;
+    static const lightString EW_BOTH_RIGHT_F_L_EW = (1 << CAR_RIGHT_FINISH) |
+                                                    (1 << CAR_STRAIGHT_STOP) |
+                                                    (1 << PEDESTRIAN_STOP);
+    static const lightString EW_BOTH_RIGHT_F_F_NS = 0;
+    static const lightString EW_BOTH_RIGHT_F_F_EW = 0;
+
+    static const lightString EW_STRAIGHT_L_NS = ALL_STOP;
+    static const lightString EW_STRAIGHT_L_EW = ALL_STOP;
+    static const lightString EW_STRAIGHT_F_NS = 0;
+    static const lightString EW_STRAIGHT_F_EW = 0;
+
+    static const lightString EW_STRAIGHT_G_PED_G_L_NS = ALL_STOP;
+    static const lightString EW_STRAIGHT_G_PED_G_L_EW = (1 << CAR_STRAIGHT_GO) |
+                                                        (1 << PEDESTRIAN_GO);
+    static const lightString EW_STRAIGHT_G_PED_G_F_NS = 0;
+    static const lightString EW_STRAIGHT_G_PED_G_F_EW = 0;
+
+    static const lightString EW_STRAIGHT_G_PED_F_L_NS = ALL_STOP;
+    static const lightString EW_STRAIGHT_G_PED_F_L_EW = (1 << CAR_STRAIGHT_GO) |
+                                                        (1 << PEDESTRIAN_STOP);
+    static const lightString EW_STRAIGHT_G_PED_F_F_NS = 0;
+    static const lightString EW_STRAIGHT_G_PED_F_F_EW = (1 << PEDESTRIAN_STOP);
+
+    static const lightString EW_STRAIGHT_G_L_NS = ALL_STOP;
+    static const lightString EW_STRAIGHT_G_L_EW = (1 << CAR_STRAIGHT_GO) |
+                                                  (1 << PEDESTRIAN_STOP);
+    static const lightString EW_STRAIGHT_G_F_NS = 0;
+    static const lightString EW_STRAIGHT_G_F_EW = 0;
+
+    static const lightString EW_STRAIGHT_F_L_NS = ALL_STOP;
+    static const lightString EW_STRAIGHT_F_L_EW = (1 << CAR_STRAIGHT_FINISH) |
+                                                  (1 << PEDESTRIAN_STOP);
+    static const lightString EW_STRAIGHT_F_F_NS = 0;
+    static const lightString EW_STRAIGHT_F_F_EW = 0;
+
+};
 
 class IntersectionController : public AbstractController
 {
@@ -98,24 +237,31 @@ public:
 
 private:
     //instance variables
+    unsigned int time;
+    ControllerInfo::controllerState state;
+    ControllerInfo::controllerFlag flags[ControllerInfo::CONTROLLER_FLAG_SENTINEL];
 
     //a CONTROLLER_STATE_SENTINAL-element array of function pointers
-    void (IntersectionController::*stateRecord[CONTROLLER_STATE_SENTINAL])();
+    void (IntersectionController::*stateRecord
+            [ControllerInfo::CONTROLLER_STATE_SENTINAL])();
 
     //storage for light and flash configurations for each state
-    lightString lightFlagsNS[CONTROLLER_STATE_SENTINAL];
-    lightString lightFlagsEW[CONTROLLER_STATE_SENTINAL];
+    std::list<LightHandler *> lightsNS;
+    std::list<LightHandler *> lightsEW;
 
-    lightString flashFlagsNS[CONTROLLER_STATE_SENTINAL];
-    lightString flashFlagsEW[CONTROLLER_STATE_SENTINAL];
+    Light::lightString lightFlagsNS[ControllerInfo::CONTROLLER_STATE_SENTINAL];
+    Light::lightString lightFlagsEW[ControllerInfo::CONTROLLER_STATE_SENTINAL];
+
+    Light::lightString flashFlagsNS[ControllerInfo::CONTROLLER_STATE_SENTINAL];
+    Light::lightString flashFlagsEW[ControllerInfo::CONTROLLER_STATE_SENTINAL];
 
 private:
     virtual void initialiseStates();
 
-    void mapState(controllerState state,
+    void mapState(ControllerInfo::controllerState state,
                   void (IntersectionController::*stateRecord)(), 
-                  lightString lightFlagsNS, lightString lightFlagsEW,
-                  lightString flashFlagsNS, lightString flashFlagsEW
+                  Light::lightString lightFlagsNS, Light::lightString lightFlagsEW,
+                  Light::lightString flashFlagsNS, Light::lightString flashFlagsEW
                  );
 
     //private state functions
