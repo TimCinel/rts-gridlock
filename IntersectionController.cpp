@@ -11,12 +11,6 @@ IntersectionController::IntersectionController()
 
     this->initialiseStates();
 
-    this->lightsNS.push_back(new LightHandler(I1_I3_NS_LIGHT_CONF));
-    this->lightsNS.push_back(new LightHandler(I1_I3_NS_LIGHT_CONF));
-
-    this->lightsNS.push_back(new LightHandler(I1_I3_NS_LIGHT_CONF));
-    this->lightsNS.push_back(new LightHandler(I1_I3_NS_LIGHT_CONF));
-
 }
 
 void IntersectionController::trigger()
@@ -24,16 +18,56 @@ void IntersectionController::trigger()
     (this->*stateRecord[this->state])();
 }
 
+void IntersectionController::setFlag(unsigned int flag)
+{
+    if (flag < CONTROLLER_FLAG_SENTINEL)
+        //regular case - just set the flag
+        this->flags[flag % CONTROLLER_FLAG_SENTINEL] = 1;
+    else
+        //special case for modes - only keep one flag with multiple values
+        this->flags[SYSTEM_MODE] = flag;
+}
+
+int IntersectionController::getFlag(unsigned int flag) 
+{
+    if (flag < CONTROLLER_FLAG_SENTINEL)
+        return this->flags[flag % CONTROLLER_FLAG_SENTINEL];
+    else
+        return flag == this->flags[SYSTEM_MODE];
+}
+
+
 void IntersectionController::startup()
 {
-    std::cout << "STARTUP";
-    this->state = NS_CLEAR;
+    if (this->getTime() > 0)
+        return;
+
+    this->transitionToState(NS_CLEAR, T_NS_CLEAR);
 }
 
 void IntersectionController::ns_clear()
 {
-    std::cout << "NS_CLEAR";
-    this->state = STARTUP;
+    if (this->getTime() > 0)
+        return;
+
+    if (
+            this->getFlag(SENSOR_MODE) ||
+            this->getFlag(COMMAND_MODE) && this->getFlag(CMD_NS_PED) ||
+            this->getFlag(COMMAND_MODE) && this->getFlag(CMD_NS_STRAIGHT) ||
+            this->getFlag(TIMER_MODE) && this->getFlag(SEQ_NS_STRAIGHT) ||
+            this->getFlag(TIMER_MODE) && this->getFlag(SEQ_NS_PED)
+       )
+        this->transitionToState(NS_STRAIGHT, 0);
+    else if (
+            this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_STRAIGHT) || 
+            this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_PED) || 
+            this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_RIGHT) 
+            )
+        this->transitionToState(EW_CLEAR, T_EW_CLEAR);
+    else
+        //no transition defined - crash
+        this->transitionToState(STARTUP, T_STARTUP);
+
 }
 
 void IntersectionController::ns_tram_g()
@@ -116,7 +150,7 @@ mapState(controllerState state,
 void IntersectionController::display()
 {
    //vars
-   
+   /*
    printf("        x x x        \n");
    printf("        - - -        \n");
    printf("       |G|W|G|       \n");
@@ -136,13 +170,36 @@ void IntersectionController::display()
    printf("       |G|W|G|       \n");
    printf("        - - -        \n");
    printf("        x x x        \n");
+   */
 }
 
 
+void IntersectionController::transitionToState(controllerState state, int time)
+{
+    //TODO: Send message to controller
+
+    //set lights
+    for (int i = 0; i < this->lightsNS.size(); i++)
+        this->lightsNS[i]->setState(this->lightFlagsNS[state], 
+                                    this->flashFlagsNS[state]);
+
+    for (int i = 0; i < this->lightsEW.size(); i++)
+        this->lightsEW[i]->setState(this->lightFlagsEW[state],
+                                    this->flashFlagsEW[state]);
+
+    this->resetTimer(time);
+    this->state = state;
+
+    std::cout << "Transitioning to state: " << controllerStateNames[state] << "\n";
+    std::cout << "Time: " << time << "\n";
+
+}
 
 void IntersectionController::initialiseStates() 
 {
     std::cout << "initialiseStates\n";
+
+    //populate state map
     mapState(STARTUP, &IntersectionController::startup, 
              STARTUP_L_NS, STARTUP_L_EW, 
              STARTUP_F_NS, STARTUP_F_EW);
@@ -216,15 +273,26 @@ void IntersectionController::initialiseStates()
              EW_STRAIGHT_F_F_NS, EW_STRAIGHT_F_F_EW);
 
 
+    //add some lights
+    this->lightsNS.push_back(new LightHandler(I1_I3_NS_LIGHT_CONF));
+    this->lightsNS.push_back(new LightHandler(I1_I3_NS_LIGHT_CONF));
+
+    this->lightsNS.push_back(new LightHandler(I1_I3_NS_LIGHT_CONF));
+    this->lightsNS.push_back(new LightHandler(I1_I3_NS_LIGHT_CONF));
+
+
     //default to sequence mode
-    this->flags[SYSTEM_MODE] = TIMER_MODE;
+    this->setFlag(TIMER_MODE);
+
+    //default sequence
+    this->setFlag(SEQ_NS_STRAIGHT);
+    this->setFlag(SEQ_NS_PED);
+
+    this->setFlag(SEQ_EW_RIGHT);
+    this->setFlag(SEQ_EW_STRAIGHT);
+    this->setFlag(SEQ_EW_PED);
 
     //initial state
-    this->time = T_STARTUP;
-    this->state = STARTUP;
+    this->transitionToState(STARTUP, T_STARTUP);
+
 }
-
-
-
-
-

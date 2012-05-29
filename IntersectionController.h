@@ -4,7 +4,7 @@
 #include "AbstractController.h"
 #include "LightHandler.h"
 
-#include <list>
+#include <vector>
 
 
 namespace ControllerInfo
@@ -32,6 +32,27 @@ namespace ControllerInfo
         EW_STRAIGHT_G,
         EW_STRAIGHT_F,
         CONTROLLER_STATE_SENTINAL
+    };
+
+    static const char *controllerStateNames[] = {
+        "STARTUP",
+        "NS_CLEAR",
+        "NS_TRAM_G",
+        "NS_TRAM_F",
+        "NS_STRAIGHT",
+        "NS_STRAIGHT_G_PED_G",
+        "NS_STRAIGHT_G_PED_F",
+        "NS_STRAIGHT_G",
+        "NS_STRAIGHT_F",
+        "EW_CLEAR",
+        "EW_BOTH_RIGHT_G",
+        "EW_BOTH_RIGHT_F",
+        "EW_STRAIGHT",
+        "EW_STRAIGHT_G_PED_G",
+        "EW_STRAIGHT_G_PED_F",
+        "EW_STRAIGHT_G",
+        "EW_STRAIGHT_F",
+        "CONTROLLER_STATE_SENTINAL"
     };
 
 
@@ -62,6 +83,32 @@ namespace ControllerInfo
         COMMAND_MODE,
         SENSOR_MODE,
         TIMER_MODE
+    };
+
+    static const char *controllerFlagNames[] = {
+        "SYSTEM_MODE",
+        "CMD_EW_STRAIGHT",
+        "CMD_EW_PED",
+        "CMD_EW_RIGHT",
+        "CMD_NS_STRAIGHT",
+        "CMD_NS_PED",
+        "CMD_TRAM",
+        "SEN_EW_STRAIGHT",
+        "SEN_EW_PED",
+        "SEN_EW_RIGHT",
+        "SEN_NS_STRAIGHT",
+        "SEN_NS_PED", 
+        "SEN_TRAM", 
+        "SEQ_EW_STRAIGHT",
+        "SEQ_EW_PED",
+        "SEQ_EW_RIGHT",
+        "SEQ_NS_STRAIGHT",
+        "SEQ_NS_PED", 
+        "SEQ_TRAM", 
+        "CONTROLLER_FLAG_SENTINEL",
+        "COMMAND_MODE",
+        "SENSOR_MODE",
+        "TIMER_MODE"
     };
 
 
@@ -231,23 +278,26 @@ public:
     //constructor
     IntersectionController();
 
-    //functions
+    //overriding abstract methods
     virtual void trigger();
+
+    virtual void setFlag(unsigned int flag);
+    virtual int getFlag(unsigned int flag);
+
     void display();
 
 private:
     //instance variables
-    unsigned int time;
     ControllerInfo::controllerState state;
-    ControllerInfo::controllerFlag flags[ControllerInfo::CONTROLLER_FLAG_SENTINEL];
+    unsigned int flags[ControllerInfo::CONTROLLER_FLAG_SENTINEL];
 
     //a CONTROLLER_STATE_SENTINAL-element array of function pointers
     void (IntersectionController::*stateRecord
             [ControllerInfo::CONTROLLER_STATE_SENTINAL])();
 
     //storage for light and flash configurations for each state
-    std::list<LightHandler *> lightsNS;
-    std::list<LightHandler *> lightsEW;
+    std::vector<LightHandler *> lightsNS;
+    std::vector<LightHandler *> lightsEW;
 
     Light::lightString lightFlagsNS[ControllerInfo::CONTROLLER_STATE_SENTINAL];
     Light::lightString lightFlagsEW[ControllerInfo::CONTROLLER_STATE_SENTINAL];
@@ -256,6 +306,7 @@ private:
     Light::lightString flashFlagsEW[ControllerInfo::CONTROLLER_STATE_SENTINAL];
 
 private:
+    virtual void transitionToState(ControllerInfo::controllerState state, int time);
     virtual void initialiseStates();
 
     void mapState(ControllerInfo::controllerState state,
@@ -282,6 +333,7 @@ private:
     virtual void ew_straight_g_ped_f();
     virtual void ew_straight_g();
     virtual void ew_straight_f();
+
 };
 
 #endif

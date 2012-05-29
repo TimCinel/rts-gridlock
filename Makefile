@@ -17,11 +17,11 @@ ${OBJS}: %.o: %.cpp
 test_sensor: test/test_Sensor.cpp test/mock_Controller.h
 	${CC} ${CCFLAGS} ${TESTFLAGS} ${SRCS} test/test_Sensor.cpp test/mock_Controller.h -o test_sensor
 
-test_lighthandler: test/test_LightHandler.cpp ${SRCS}
+test_lighthandler: test/test_LightHandler.cpp 
 	${CC} ${CCFLAGS} ${TESTFLAGS} ${SRCS} test/test_LightHandler.cpp -o test_lighthandler
 
-test_intersectioncontroller: test/test_IntersectionController.cpp ${SRCS}
-	${CC} ${CCFLAGS} ${TESTFLAGS} IntersectionController.cpp test/test_IntersectionController.cpp -o test_intersectioncontroller
+test_intersectioncontroller: test/test_IntersectionController.cpp LightHandler.cpp Sensor.cpp
+	${CC} ${CCFLAGS} ${TESTFLAGS} AbstractController.cpp IntersectionController.cpp test/test_IntersectionController.cpp LightHandler.cpp Sensor.cpp -o test_intersectioncontroller
 
 clean:
 	rm -rf *.o *.out test_* ${TARGET}

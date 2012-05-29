@@ -1,5 +1,5 @@
 #include "LightHandler.h"
-#include <stdio.h>
+#include <iostream>
 
 namespace Light
 {
@@ -31,6 +31,8 @@ LightHandler::LightHandler(lightString lightConfiguration) :
 
 void LightHandler::setState(lightString lights, lightString flashes) 
 {
+    std::cout << "Lights: " << lights << ", Flashes: " << flashes << "\n";
+
     //only enable lights that exist in this configuration
     this->lightFlags = this->lightConfiguration & lights;
     this->flashFlags = this->lightConfiguration & flashes;
