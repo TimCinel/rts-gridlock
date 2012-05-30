@@ -16,4 +16,7 @@ int main() {
         controller->tick();
 
     std::cout << "Test Over\n";
+
+	
+    delete controller;
 }

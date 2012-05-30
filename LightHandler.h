@@ -1,12 +1,14 @@
 #ifndef LIGHTHANDLER_H
 #define LIGHTHANDLER_H
 
+#include <cstdio>
+
 namespace Light {
 
     typedef unsigned int lightString; 
 
     //all light options
-    typedef enum lightOption {
+    typedef enum {
         CAR_STRAIGHT_STOP,
         CAR_STRAIGHT_FINISH,
         CAR_STRAIGHT_GO,
@@ -17,7 +19,7 @@ namespace Light {
         TRAM_FINISH,
         TRAM_GO,
         LIGHTOPTION_SENTINEL
-    };
+    } lightOption;
 
     //conveniently-grouped light options
     static const lightString CAR_STRAIGHT   = (1 << CAR_STRAIGHT_GO) | 

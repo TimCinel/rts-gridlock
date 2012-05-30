@@ -21,7 +21,7 @@ test_lighthandler: test/test_LightHandler.cpp
 	${CC} ${CCFLAGS} ${TESTFLAGS} ${SRCS} test/test_LightHandler.cpp -o test_lighthandler
 
 test_intersectioncontroller: test/test_IntersectionController.cpp LightHandler.cpp Sensor.cpp
-	${CC} ${CCFLAGS} ${TESTFLAGS} AbstractController.cpp IntersectionController.cpp test/test_IntersectionController.cpp LightHandler.cpp Sensor.cpp -o test_intersectioncontroller
+	${CC} ${CCFLAGS} ${TESTFLAGS} AbstractController.cpp IntersectionController.cpp test/test_IntersectionController.cpp LightHandler.cpp Sensor.cpp -o test_intersectioncontroller -lpthread
 
 clean:
 	rm -rf *.o *.out test_* ${TARGET}

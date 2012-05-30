@@ -12,7 +12,7 @@ namespace ControllerInfo
 
     //STATE CONSTANTS
 
-    typedef enum controllerState 
+    typedef enum
     {
         STARTUP,
         NS_CLEAR,
@@ -32,7 +32,7 @@ namespace ControllerInfo
         EW_STRAIGHT_G,
         EW_STRAIGHT_F,
         CONTROLLER_STATE_SENTINAL
-    };
+    } controllerState;
 
     static const char *controllerStateNames[] = {
         "STARTUP",
@@ -58,7 +58,7 @@ namespace ControllerInfo
 
     //CONTROLLER CONSTANTS
 
-    typedef enum controllerFlag 
+    typedef enum 
     {
         SYSTEM_MODE,
         CMD_EW_STRAIGHT,
@@ -83,7 +83,7 @@ namespace ControllerInfo
         COMMAND_MODE,
         SENSOR_MODE,
         TIMER_MODE
-    };
+    } controllerFlag;
 
     static const char *controllerFlagNames[] = {
         "SYSTEM_MODE",
