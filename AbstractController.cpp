@@ -70,6 +70,5 @@
 void AbstractController::tick()
 {
    this->time--;
-   std::cout << "Time: " << this->time << "\n";
    this->trigger();
 }
