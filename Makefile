@@ -4,7 +4,7 @@ OBJS		:= ${SRCS:.cpp=.o}
 
 
 CC     		:= g++
-CCFLAGS		:= -O0 -g
+CCFLAGS		:= -O0 -g -Wall -pedantic
 LDFLAGS		:= 
 TESTFLAGS	:= -DMOCK_OBJECTS
 
