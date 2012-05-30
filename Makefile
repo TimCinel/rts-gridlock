@@ -20,8 +20,11 @@ test_sensor: test/test_Sensor.cpp test/mock_Controller.h
 test_lighthandler: test/test_LightHandler.cpp 
 	${CC} ${CCFLAGS} ${TESTFLAGS} ${SRCS} test/test_LightHandler.cpp -o test_lighthandler
 
-test_intersectioncontroller: test/test_IntersectionController.cpp LightHandler.cpp Sensor.cpp
+test_intersectioncontroller: test/test_IntersectionController.cpp IntersectionController.cpp LightHandler.cpp Sensor.cpp
 	${CC} ${CCFLAGS} ${TESTFLAGS} AbstractController.cpp IntersectionController.cpp test/test_IntersectionController.cpp LightHandler.cpp Sensor.cpp -o test_intersectioncontroller
+
+test_intersectionsensor: test/test_IntersectionController.cpp IntersectionController.cpp  LightHandler.cpp Sensor.cpp
+	${CC} ${CCFLAGS} AbstractController.cpp IntersectionController.cpp test/test_IntersectionSensor.cpp LightHandler.cpp Sensor.cpp -o test_intersectionsensor
 
 clean:
 	rm -rf *.o *.out test_* ${TARGET}
