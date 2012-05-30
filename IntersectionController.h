@@ -225,13 +225,13 @@ namespace ControllerInfo
     
     //light patterns for east-west traffic flow
     
-    static const lightString EW_CLEAR_L_NS = (1 << CAR_STRAIGHT_FINISH) | 
+    static const lightString EW_CLEAR_L_NS = (1 << CAR_STRAIGHT_STOP) | 
                                              (1 << PEDESTRIAN_STOP);
-    static const lightString EW_CLEAR_L_EW = (1 << CAR_STRAIGHT_FINISH) |
+    static const lightString EW_CLEAR_L_EW = (1 << CAR_STRAIGHT_STOP) |
                                              (1 << PEDESTRIAN_STOP);
-    static const lightString EW_CLEAR_F_NS = (1 << CAR_STRAIGHT_FINISH) |
+    static const lightString EW_CLEAR_F_NS = (1 << CAR_STRAIGHT_STOP) |
                                              (1 << PEDESTRIAN_STOP);
-    static const lightString EW_CLEAR_F_EW = (1 << CAR_STRAIGHT_FINISH) |
+    static const lightString EW_CLEAR_F_EW = (1 << CAR_STRAIGHT_STOP) |
                                              (1 << PEDESTRIAN_STOP);
 
     static const lightString EW_BOTH_RIGHT_G_L_NS = ALL_STOP;
@@ -277,6 +277,38 @@ namespace ControllerInfo
     static const lightString EW_STRAIGHT_F_F_NS = 0;
     static const lightString EW_STRAIGHT_F_F_EW = 0;
 
+
+    //STATE TRANSITION CLEAR FLAG CONSTANTS
+
+    static const int NS_SENSORS                 = (1 << SEN_NS_STRAIGHT) |
+                                                  (1 << SEN_NS_PED) |
+                                                  (1 << SEN_TRAM); 
+
+    static const int EW_SENSORS                 = (1 << SEN_EW_STRAIGHT) |
+                                                  (1 << SEN_EW_PED) |
+                                                  (1 << SEN_EW_RIGHT);
+
+    static const int ALL_SENSORS                = NS_SENSORS | EW_SENSORS;
+                                                  
+
+    static const int STARTUP_C_EXIT             = ALL_SENSORS;
+    static const int NS_CLEAR_C_EXIT            = 0;
+    static const int NS_TRAM_G_C_EXIT           = 0;
+    static const int NS_TRAM_F_C_EXIT           = (1 << SEN_TRAM);
+    static const int NS_STRAIGHT_C_EXIT         = 0;
+    static const int NS_STRAIGHT_G_PED_G_C_EXIT = (1 << SEN_NS_PED);
+    static const int NS_STRAIGHT_G_PED_F_C_EXIT = 0;
+    static const int NS_STRAIGHT_G_C_EXIT       = (1 << SEN_NS_STRAIGHT);
+    static const int NS_STRAIGHT_F_C_EXIT       = 0;
+    static const int EW_CLEAR_C_EXIT            = 0;
+    static const int EW_BOTH_RIGHT_G_C_EXIT     = 0;
+    static const int EW_BOTH_RIGHT_F_C_EXIT     = 0;
+    static const int EW_STRAIGHT_C_EXIT         = 0;
+    static const int EW_STRAIGHT_G_PED_G_C_EXIT = (1 << SEN_EW_PED);
+    static const int EW_STRAIGHT_G_PED_F_C_EXIT = 0;
+    static const int EW_STRAIGHT_G_C_EXIT       = (1 << SEN_EW_STRAIGHT) |
+                                                  (1 << SEN_EW_RIGHT);
+    static const int EW_STRAIGHT_F_C_EXIT       = 0;
 }
 
 //constants for intersection type
@@ -306,27 +338,33 @@ private:
     void (IntersectionController::*stateRecord
             [ControllerInfo::CONTROLLER_STATE_SENTINAL])();
 
-    //storage for light and flash configurations for each state
+    //storage for lights
     std::vector<LightHandler *> lightsNS;
     std::vector<LightHandler *> lightsEW;
 
+    //storage for light and flash configurations for each state
     Light::lightString lightFlagsNS[ControllerInfo::CONTROLLER_STATE_SENTINAL];
     Light::lightString lightFlagsEW[ControllerInfo::CONTROLLER_STATE_SENTINAL];
 
     Light::lightString flashFlagsNS[ControllerInfo::CONTROLLER_STATE_SENTINAL];
     Light::lightString flashFlagsEW[ControllerInfo::CONTROLLER_STATE_SENTINAL];
 
+    //a map of bitStrings indicating which states to clear when exiting a state
+    int exitClearFlags[ControllerInfo::CONTROLLER_STATE_SENTINAL];
+
     //type of intersection controller, TRAM for 'i2', NOTRAM for 'i1' or 'i3'
     unsigned int type;
 
 private:
     virtual void transitionToState(ControllerInfo::controllerState state, int time);
+    virtual void clearFlags(int bitString);
     virtual void initialiseStates();
 
     void mapState(ControllerInfo::controllerState state,
                   void (IntersectionController::*stateRecord)(), 
                   Light::lightString lightFlagsNS, Light::lightString lightFlagsEW,
-                  Light::lightString flashFlagsNS, Light::lightString flashFlagsEW
+                  Light::lightString flashFlagsNS, Light::lightString flashFlagsEW,
+                  int clearFlags
                  );
 
     //private state functions

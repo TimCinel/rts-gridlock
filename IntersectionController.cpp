@@ -42,6 +42,9 @@ int IntersectionController::getFlag(unsigned int flag)
         return flag == this->flags[SYSTEM_MODE];
 }
 
+void IntersectionController::clearFlag(unsigned int flag) {
+    this->flags[flag % CONTROLLER_FLAG_SENTINEL] = 0;
+}
 
 void IntersectionController::startup()
 {
@@ -262,7 +265,8 @@ void IntersectionController::
 mapState(controllerState state,
          void (IntersectionController::*stateFunction)(), 
          lightString lightFlagsNS, lightString lightFlagsEW,
-         lightString flashFlagsNS, lightString flashFlagsEW
+         lightString flashFlagsNS, lightString flashFlagsEW,
+         int clearFlags
         )
 {
     this->stateRecord[state] = stateFunction;
@@ -272,6 +276,7 @@ mapState(controllerState state,
 
     this->flashFlagsNS[state] = flashFlagsNS;
     this->flashFlagsEW[state] = flashFlagsEW;
+
 }
 
 void IntersectionController::display()
@@ -305,6 +310,9 @@ void IntersectionController::transitionToState(controllerState state, int time)
 {
     //TODO: Send message to controller
 
+    //clear any flags before exiting current state
+    this->clearFlags(this->exitClearFlags[state]);
+
     //set lights
     for (unsigned int i = 0; i < this->lightsNS.size(); i++)
         this->lightsNS[i]->setState(this->lightFlagsNS[state], 
@@ -322,6 +330,15 @@ void IntersectionController::transitionToState(controllerState state, int time)
 
 }
 
+void IntersectionController::clearFlags(int bitString)
+{
+    for (unsigned int i = 1; i < sizeof(bitString); i++)
+        if (1 & (bitString << i)) {
+            this->clearFlag(i);
+            std::cout << "Clearing " << controllerStateNames[i] << "\n";
+        }
+}
+
 void IntersectionController::initialiseStates() 
 {
     std::cout << "initialiseStates\n";
@@ -329,78 +346,96 @@ void IntersectionController::initialiseStates()
     //populate state map
     mapState(STARTUP, &IntersectionController::startup, 
              STARTUP_L_NS, STARTUP_L_EW, 
-             STARTUP_F_NS, STARTUP_F_EW);
+             STARTUP_F_NS, STARTUP_F_EW, 
+             STARTUP_C_EXIT);
 
     mapState(NS_CLEAR, &IntersectionController::ns_clear, 
              NS_CLEAR_L_NS, NS_CLEAR_L_EW, 
-             NS_CLEAR_F_NS, NS_CLEAR_F_EW);
+             NS_CLEAR_F_NS, NS_CLEAR_F_EW, 
+             NS_CLEAR_C_EXIT);
 
     if (type == TRAM)
     {
         mapState(NS_TRAM_G, &IntersectionController::ns_tram_g,
                  NS_TRAM_G_L_NS, NS_TRAM_G_L_EW,
-                 NS_TRAM_G_F_NS, NS_TRAM_G_F_EW);
+                 NS_TRAM_G_F_NS, NS_TRAM_G_F_EW, 
+                 NS_TRAM_G_C_EXIT);
 
         mapState(NS_TRAM_F, &IntersectionController::ns_tram_f,
                  NS_TRAM_F_L_NS, NS_TRAM_F_L_EW,
-                 NS_TRAM_F_F_NS, NS_TRAM_F_F_EW);
+                 NS_TRAM_F_F_NS, NS_TRAM_F_F_EW, 
+                 NS_TRAM_F_C_EXIT);
     }
 
     mapState(NS_STRAIGHT, &IntersectionController::ns_straight,
              NS_STRAIGHT_L_NS, NS_STRAIGHT_L_EW,
-             NS_STRAIGHT_F_NS, NS_STRAIGHT_F_EW);
+             NS_STRAIGHT_F_NS, NS_STRAIGHT_F_EW, 
+             NS_STRAIGHT_C_EXIT);
 
     mapState(NS_STRAIGHT_G_PED_G, &IntersectionController::ns_straight_g_ped_g,
              NS_STRAIGHT_G_PED_G_L_NS, NS_STRAIGHT_G_PED_G_L_EW,
-             NS_STRAIGHT_G_PED_G_F_NS, NS_STRAIGHT_G_PED_G_F_EW);
+             NS_STRAIGHT_G_PED_G_F_NS, NS_STRAIGHT_G_PED_G_F_EW, 
+             NS_STRAIGHT_G_PED_G_C_EXIT);
 
     mapState(NS_STRAIGHT_G_PED_F, &IntersectionController::ns_straight_g_ped_f,
              NS_STRAIGHT_G_PED_F_L_NS, NS_STRAIGHT_G_PED_F_L_EW,
-             NS_STRAIGHT_G_PED_F_F_NS, NS_STRAIGHT_G_PED_F_F_EW);
+             NS_STRAIGHT_G_PED_F_F_NS, NS_STRAIGHT_G_PED_F_F_EW, 
+             NS_STRAIGHT_G_PED_F_C_EXIT);
 
     mapState(NS_STRAIGHT_G_PED_F, &IntersectionController::ns_straight_g_ped_f,
              NS_STRAIGHT_G_PED_F_L_NS, NS_STRAIGHT_G_PED_F_L_EW,
-             NS_STRAIGHT_G_PED_F_F_NS, NS_STRAIGHT_G_PED_F_F_EW);
+             NS_STRAIGHT_G_PED_F_F_NS, NS_STRAIGHT_G_PED_F_F_EW, 
+             NS_STRAIGHT_G_PED_F_C_EXIT);
 
     mapState(NS_STRAIGHT_G, &IntersectionController::ns_straight_g,
              NS_STRAIGHT_G_L_NS, NS_STRAIGHT_G_L_EW,
-             NS_STRAIGHT_G_F_NS, NS_STRAIGHT_G_F_EW);
+             NS_STRAIGHT_G_F_NS, NS_STRAIGHT_G_F_EW, 
+             NS_STRAIGHT_G_C_EXIT);
 
     mapState(NS_STRAIGHT_F, &IntersectionController::ns_straight_f,
              NS_STRAIGHT_F_L_NS, NS_STRAIGHT_F_L_EW,
-             NS_STRAIGHT_F_F_NS, NS_STRAIGHT_F_F_EW);
+             NS_STRAIGHT_F_F_NS, NS_STRAIGHT_F_F_EW, 
+             NS_STRAIGHT_F_C_EXIT);
 
     mapState(EW_CLEAR, &IntersectionController::ew_clear,
              EW_CLEAR_L_NS, EW_CLEAR_L_EW,
-             EW_CLEAR_F_NS, EW_CLEAR_F_EW);
+             EW_CLEAR_F_NS, EW_CLEAR_F_EW, 
+             EW_CLEAR_C_EXIT);
 
     mapState(EW_BOTH_RIGHT_G, &IntersectionController::ew_both_right_g,
              EW_BOTH_RIGHT_G_L_NS, EW_BOTH_RIGHT_G_L_EW,
-             EW_BOTH_RIGHT_G_F_NS, EW_BOTH_RIGHT_G_F_EW);
+             EW_BOTH_RIGHT_G_F_NS, EW_BOTH_RIGHT_G_F_EW, 
+             EW_BOTH_RIGHT_G_C_EXIT);
 
     mapState(EW_BOTH_RIGHT_F, &IntersectionController::ew_both_right_f,
              EW_BOTH_RIGHT_F_L_NS, EW_BOTH_RIGHT_F_L_EW,
-             EW_BOTH_RIGHT_F_F_NS, EW_BOTH_RIGHT_F_F_EW);
+             EW_BOTH_RIGHT_F_F_NS, EW_BOTH_RIGHT_F_F_EW, 
+             EW_BOTH_RIGHT_F_C_EXIT);
 
     mapState(EW_STRAIGHT, &IntersectionController::ew_straight,
              EW_STRAIGHT_L_NS, EW_STRAIGHT_L_EW,
-             EW_STRAIGHT_F_NS, EW_STRAIGHT_F_EW);
+             EW_STRAIGHT_F_NS, EW_STRAIGHT_F_EW, 
+             EW_STRAIGHT_C_EXIT);
 
     mapState(EW_STRAIGHT_G_PED_G, &IntersectionController::ew_straight_g_ped_g,
              EW_STRAIGHT_G_PED_G_L_NS, EW_STRAIGHT_G_PED_G_L_EW,
-             EW_STRAIGHT_G_PED_G_F_NS, EW_STRAIGHT_G_PED_G_F_EW);
+             EW_STRAIGHT_G_PED_G_F_NS, EW_STRAIGHT_G_PED_G_F_EW, 
+             EW_STRAIGHT_G_PED_G_C_EXIT);
 
     mapState(EW_STRAIGHT_G_PED_F, &IntersectionController::ew_straight_g_ped_f,
              EW_STRAIGHT_G_PED_F_L_NS, EW_STRAIGHT_G_PED_F_L_EW,
-             EW_STRAIGHT_G_PED_F_F_NS, EW_STRAIGHT_G_PED_F_F_EW);
+             EW_STRAIGHT_G_PED_F_F_NS, EW_STRAIGHT_G_PED_F_F_EW, 
+             EW_STRAIGHT_G_PED_F_C_EXIT);
 
     mapState(EW_STRAIGHT_G, &IntersectionController::ew_straight_g,
              EW_STRAIGHT_G_L_NS, EW_STRAIGHT_G_L_EW,
-             EW_STRAIGHT_G_F_NS, EW_STRAIGHT_G_F_EW);
+             EW_STRAIGHT_G_F_NS, EW_STRAIGHT_G_F_EW, 
+             EW_STRAIGHT_G_C_EXIT);
 
     mapState(EW_STRAIGHT_F, &IntersectionController::ew_straight_f,
              EW_STRAIGHT_F_L_NS, EW_STRAIGHT_F_L_EW,
-             EW_STRAIGHT_F_F_NS, EW_STRAIGHT_F_F_EW);
+             EW_STRAIGHT_F_F_NS, EW_STRAIGHT_F_F_EW, 
+             EW_STRAIGHT_F_C_EXIT);
 
 
     //add some lights
