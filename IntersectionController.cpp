@@ -15,6 +15,9 @@ IntersectionController::IntersectionController()
 
 void IntersectionController::trigger()
 {
+    if (this->getTime() > 0)
+        return;
+
     (this->*stateRecord[this->state])();
 }
 
@@ -39,31 +42,40 @@ int IntersectionController::getFlag(unsigned int flag)
 
 void IntersectionController::startup()
 {
-    if (this->getTime() > 0)
-        return;
-
     this->transitionToState(NS_CLEAR, T_NS_CLEAR);
 }
 
 void IntersectionController::ns_clear()
 {
-    if (this->getTime() > 0)
-        return;
-
     if (
+            //NS_TRAM_G guards
+            this->getFlag(TIMER_MODE) && this->getFlag(SEQ_TRAM) ||
+            this->getFlag(COMMAND_MODE) && this->getFlag(CMD_TRAM) ||
+            this->getFlag(SENSOR_MODE) && this->getFlag(SEN_TRAM)
+       )
+
+        this->transitionToState(NS_TRAM_G, T_TRAM_G);
+
+    else if (
+            //NS_STRAIGHT guards
             this->getFlag(SENSOR_MODE) ||
             this->getFlag(COMMAND_MODE) && this->getFlag(CMD_NS_PED) ||
             this->getFlag(COMMAND_MODE) && this->getFlag(CMD_NS_STRAIGHT) ||
             this->getFlag(TIMER_MODE) && this->getFlag(SEQ_NS_STRAIGHT) ||
             this->getFlag(TIMER_MODE) && this->getFlag(SEQ_NS_PED)
-       )
+            )
+
         this->transitionToState(NS_STRAIGHT, 0);
+
     else if (
+            //EW_CLEAR guards
             this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_STRAIGHT) || 
             this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_PED) || 
             this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_RIGHT) 
             )
+
         this->transitionToState(EW_CLEAR, T_EW_CLEAR);
+
     else
         //no transition defined - crash
         this->transitionToState(STARTUP, T_STARTUP);
@@ -72,6 +84,8 @@ void IntersectionController::ns_clear()
 
 void IntersectionController::ns_tram_g()
 {
+    this->transitionToState(NS_TRAM_F, T_TRAM_F);
+
 }
 
 void IntersectionController::ns_tram_f()
@@ -179,11 +193,11 @@ void IntersectionController::transitionToState(controllerState state, int time)
     //TODO: Send message to controller
 
     //set lights
-    for (int i = 0; i < this->lightsNS.size(); i++)
+    for (unsigned int i = 0; i < this->lightsNS.size(); i++)
         this->lightsNS[i]->setState(this->lightFlagsNS[state], 
                                     this->flashFlagsNS[state]);
 
-    for (int i = 0; i < this->lightsEW.size(); i++)
+    for (unsigned int i = 0; i < this->lightsEW.size(); i++)
         this->lightsEW[i]->setState(this->lightFlagsEW[state],
                                     this->flashFlagsEW[state]);
 
