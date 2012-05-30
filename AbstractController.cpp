@@ -2,73 +2,88 @@
 
 #include <iostream>
 
-//State AbstractController::nextState()
-//{
-//   switch (s)
-//   {
-//      case (STARTUP)
-//         s = NS_CLEAR;
-//         break;
-//      case (NS_CLEAR)
-//      {
-//         if (mode == COMMAND)
-//            s = EW_CLEAR;
-//         else if ()
-//            s = NS_TRAM_G;
-//         else if ()
-//            s = NS STRAIGHT;
-//         break;
-//      }
-//      case (NS_TRAM_G)
-//         
-//         break;
-//      case (NS_TRAM_F)
-//         
-//         break;
-//      case (NS_STRAIGHT)
-//         
-//         break;
-//      case (NS_STRAIGHT_G_PED_G)
-//         
-//         break;
-//      case (NS_STRAIGHT_G_PED_F)
-//         
-//         break;
-//      case (NS_STRAIGHT_G)
-//         
-//         break;
-//      case (NS_STRAIGHT_F)
-//         
-//         break;
-//      case (EW_CLEAR)
-//         
-//         break;
-//      case (EW_BOTH_RIGHT_G)
-//         
-//         break;
-//      case (EW_BOTH_RIGHT_F)
-//         
-//         break;
-//      case (EW_STRAIGHT)
-//         
-//         break;
-//      case (EW_STRAIGHT_G_PED_G)
-//         
-//         break;
-//      case (EW_STRAIGHT_G_PED_F)
-//         
-//         break;
-//      case (EW_STRAIGHT_G)
-//         
-//         break;
-//      case (EW_STRAIGHT_F)
-//         
-//         break;
-//   }
-//}
-
 void AbstractController::tick()
 {
-   this->time--;
-   this->trigger();
+    while (1)
+    {
+        while (!getWaynesConstant());
+        std::cout << "consumerdown...";
+        downMutex();
+
+        this->time--;
+        std::cout << "Time: " << this->time << "\n";
+        this->trigger();
+
+        std::cout << "consumerup!";
+        upMutex();
+        clearWaynesConstant();
+    }
 }
+
+void AbstractController::initClock()
+{
+    mutex = PTHREAD_MUTEX_INITIALIZER;
+    waynesConstant = 1;
+
+    pthread_create(&timer, NULL, runClock, this);
+}
+
+void* runClock(void* ptr)
+{
+    AbstractController* controller = (AbstractController*) ptr;
+
+    while (1)
+    {
+        sleep(1);
+
+        while (controller->getWaynesConstant());
+        std::cout << "producerdown...";
+        controller->downMutex();
+
+        std::cout << "producerup!";
+        controller->upMutex();
+        controller->setWaynesConstant();
+    }
+
+    return 0;
+}
+
+void AbstractController::endClock()
+{
+    void* result;
+
+    pthread_join(timer, &result);
+
+    //do something with result?
+}
+
+void AbstractController::downMutex()
+{
+    pthread_mutex_lock(&mutex);
+}
+
+void AbstractController::upMutex()
+{
+    pthread_mutex_unlock(&mutex);
+}
+
+int AbstractController::getWaynesConstant()
+{
+    return waynesConstant;
+}
+
+void AbstractController::setWaynesConstant()
+{
+    waynesConstant = 1;
+}
+
+void AbstractController::clearWaynesConstant()
+{
+    waynesConstant = 0;
+}
+
+void AbstractController::toggleWaynesConstant()
+{
+    waynesConstant = !waynesConstant;
+}
+

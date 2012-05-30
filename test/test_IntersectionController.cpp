@@ -6,8 +6,7 @@ using namespace ControllerInfo;
 int main() {
     IntersectionController *controller = new IntersectionController(TRAM);
 
-    for (unsigned int i = 0; i < 300; i++) 
-        controller->tick();
+    controller->tick();
 
     //controller->setFlag(COMMAND_MODE);
     //controller->setFlag(CMD_EW_STRAIGHT);

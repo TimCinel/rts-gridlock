@@ -10,6 +10,8 @@ IntersectionController::IntersectionController(unsigned int type)
 
     this->initialiseStates();
 
+    this->initClock();
+
 }
 
 void IntersectionController::trigger()
