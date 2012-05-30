@@ -404,11 +404,15 @@ void IntersectionController::initialiseStates()
 
 
     //add some lights
-    this->lightsNS.push_back(new LightHandler(I1_I3_NS_LIGHT_CONF));
-    this->lightsNS.push_back(new LightHandler(I1_I3_NS_LIGHT_CONF));
+    lightString lightConf;
+    lightConf = (NOTRAM == this->type ?  I1_I3_NS_LIGHT_CONF : I2_NS_LIGHT_CONF);
 
-    this->lightsNS.push_back(new LightHandler(I1_I3_NS_LIGHT_CONF));
-    this->lightsNS.push_back(new LightHandler(I1_I3_NS_LIGHT_CONF));
+    this->lightsNS.push_back(new LightHandler(lightConf));
+
+
+    lightConf = (NOTRAM == this->type ?  I1_I3_EW_LIGHT_CONF : I2_EW_LIGHT_CONF);
+
+    this->lightsEW.push_back(new LightHandler(lightConf));
 
 
     //default to sequence mode
