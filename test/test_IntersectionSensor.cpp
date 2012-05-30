@@ -17,7 +17,7 @@ int main(void) {
     static const int PIPES = CONTROLLER_MODE_SENTINEL - CMD_EW_STRAIGHT + 1;
     int write_fds[PIPES];
 
-    controller = new IntersectionController();
+    controller = new IntersectionController(TRAM);
 
     int i;
     for (i = 0; i < PIPES; i++) {
