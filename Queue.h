@@ -28,12 +28,12 @@
 #define MODE_REQUEST   2
 #define STATUS_NOTIFY  3
 
-struct mq_Message
+typedef struct
 {
     int header;
     char *sender;
     int msg;
-};
+} mq_message;
 
 class Queue
 {
@@ -65,7 +65,7 @@ class Queue
 
 void* Read(void* args);
 
-void SendMessage(char *dest, mq_Message* msg);
+void SendMessage(char *dest, mq_message* msg);
 
 
 #endif

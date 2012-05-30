@@ -4,7 +4,6 @@
 #include <cstdlib>
 #include <cstring>
 
-
 Queue::Queue(char* name)
 {
 
@@ -27,15 +26,15 @@ Queue::~Queue()
     //mq_unlink(name);
 }
 
-void* Read( void* args)
+void* Read(void* args)
 {
     Queue *queue = (Queue *)args;
     
         struct mq_attr attr;
-        mqd_t    qr = 0;     // 
-        mq_Message* buf;      // struct to store the message
-        char *hamburgler;    // char* for the above struct to pass to mq
-        char*     name;
+        mqd_t qr = 0;     // 
+        mq_message buf;      // struct to store the message
+        char* hamburgler;    // char* for the above struct to pass to mq
+        char* name;
 
         //if ((qr = mq_open(name, O_RDONLY)) != -1)
         //buf = queue->get_buf();
@@ -44,7 +43,7 @@ void* Read( void* args)
         name = queue->get_name();
 
         mq_getattr(qr, &attr);
-        hamburgler = (char*)((void*)buf);
+        hamburgler = (char*)((void*)&buf);
         
             
     if ((qr = mq_open(name, Q_FLAGS, Q_PERM, NULL)) != -1)
@@ -57,15 +56,15 @@ void* Read( void* args)
             while (mq_receive(qr, hamburgler, strlen(hamburgler), NULL) > 0)
             {
                 //printf("dequeue: '%s'\n", buf);
-                if (buf->header == MODE_CHANGE) {
+                if (buf.header == MODE_CHANGE) {
                     //controller->setFlag(buf.msg);
                 }
-                else if (buf->header == MODE_REQUEST)
+                else if (buf.header == MODE_REQUEST)
                 {
                     // reply with message containing expected mode
                     
                 }
-                else if (buf->header == STATUS_NOTIFY)
+                else if (buf.header == STATUS_NOTIFY)
                 {
                     // message is an int containing state
                     //mq_q.push()
@@ -79,7 +78,7 @@ void* Read( void* args)
     return NULL;
 }
 
-void SendMessage(char *dest, mq_Message* msg)
+void SendMessage(char *dest, mq_message* msg)
 {
 
     mqd_t    qs;                     // queue for sending
