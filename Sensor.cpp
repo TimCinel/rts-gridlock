@@ -1,4 +1,6 @@
+#include <cstdlib>
 #include <iostream>
+
 #include "Sensor.h"
 
 Sensor::Sensor() {
@@ -50,4 +52,7 @@ void *sensor_util::listen(void *args) {
     }
 
     std::cout << "Done Listening for " << sensor->getTrigger() << "!\n";
+
+    return NULL;
+
 }

@@ -13,8 +13,8 @@
 class Sensor {
 
 private:
-    char                trigger;        //character to detect when input is read
     Controller          *target;        //controller to set flag on
+    char                trigger;        //character to detect when input is read
     int                 flagPosition;   //flag to set when trigger is detected
     int                 readFd;         //file descriptor to read on
 
