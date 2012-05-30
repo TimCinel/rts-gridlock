@@ -2,7 +2,6 @@ TARGET		:= rts
 SRCS		:= $(wildcard *.cpp)
 OBJS		:= ${SRCS:.cpp=.o}
 
-
 CC     		:= g++
 CCFLAGS		:= -O0 -g -Wall -pedantic
 LDFLAGS		:= 
@@ -25,6 +24,9 @@ test_intersectioncontroller: test/test_IntersectionController.cpp LightHandler.c
 
 test_intersectionsensor: test/test_IntersectionController.cpp IntersectionController.cpp  LightHandler.cpp Sensor.cpp
 	${CC} ${CCFLAGS} AbstractController.cpp IntersectionController.cpp test/test_IntersectionSensor.cpp LightHandler.cpp Sensor.cpp -o test_intersectionsensor
+
+test_queue: test/test_Queue.cpp test/mock_Controller.h Queue.cpp Queue.h
+	${CC} ${CCFLAGS} ${TESTFLAGS} -l pthread -lrt test/test_Queue.cpp Queue.cp    p -o test_queue
 
 clean:
 	rm -rf *.o *.out test_* ${TARGET}
