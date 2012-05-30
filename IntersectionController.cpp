@@ -1,13 +1,12 @@
 #include "IntersectionController.h"
 
-#include <stdio.h>
-#include <iostream>
-
 using namespace ControllerInfo;
 
-IntersectionController::IntersectionController()
+IntersectionController::IntersectionController(unsigned int type)
 {
     std::cout << "Constructor\n";
+
+    this->type = type;
 
     this->initialiseStates();
 
@@ -18,7 +17,11 @@ void IntersectionController::trigger()
     if (this->getTime() > 0)
         return;
 
-    (this->*stateRecord[this->state])();
+    if ((this->stateRecord[this->state]) != NULL)
+        (this->*stateRecord[this->state])();
+    else
+        (this->*stateRecord[STARTUP])();
+
 }
 
 void IntersectionController::setFlag(unsigned int flag)
@@ -53,7 +56,6 @@ void IntersectionController::ns_clear()
             this->getFlag(COMMAND_MODE) && this->getFlag(CMD_TRAM) ||
             this->getFlag(SENSOR_MODE) && this->getFlag(SEN_TRAM)
        )
-
         this->transitionToState(NS_TRAM_G, T_TRAM_G);
 
     else if (
@@ -90,58 +92,169 @@ void IntersectionController::ns_tram_g()
 
 void IntersectionController::ns_tram_f()
 {
+    this->transitionToState(NS_CLEAR, T_NS_CLEAR);
 }
 
 void IntersectionController::ns_straight()
 {
+    if (
+       //NS_STRAIGHT_G guards
+       this->getFlag(COMMAND_MODE) && this->getFlag(CMD_NS_STRAIGHT)
+       )
+        this->transitionToState(NS_STRAIGHT_G, T_NS_STRAIGHT_G_QUICK);
+
+    else if (
+            //NS_STRAIGHT_G_PED_G guards
+            this->getFlag(TIMER_MODE) && this->getFlag(SEQ_NS_PED) ||
+            this->getFlag(SENSOR_MODE) && this->getFlag(SEN_NS_PED) ||
+            this->getFlag(COMMAND_MODE) && this->getFlag(CMD_NS_PED)
+            )
+        this->transitionToState(NS_STRAIGHT_G_PED_G, T_NS_PED_G);
+
+    else
+        //crash
+        this->transitionToState(STARTUP, T_STARTUP);
+
 }
 
 void IntersectionController::ns_straight_g_ped_g()
 {
+    if (
+       //NS_STRAIGHT_G_PED_F guards
+       this->getFlag(SENSOR_MODE) ||
+       this->getFlag(TIMER_MODE)
+       )
+        this->transitionToState(NS_STRAIGHT_G_PED_F, T_NS_PED_F);
+
+    else
+        //crash
+        this->transitionToState(STARTUP, T_STARTUP);
+        
 }
 
 void IntersectionController::ns_straight_g_ped_f()
 {
+    this->transitionToState(NS_STRAIGHT_G, T_NS_STRAIGHT_G_QUICK);
+
 }
 
 void IntersectionController::ns_straight_g()
 {
+    this->transitionToState(NS_STRAIGHT_F, T_NS_STRAIGHT_F);
+
 }
 
 void IntersectionController::ns_straight_f()
 {
+    this->transitionToState(EW_CLEAR, T_EW_CLEAR);
+
 }
 
 void IntersectionController::ew_clear()
 {
+    if (
+       //EW_BOTH_RIGHT guards
+       this->getFlag(TIMER_MODE) && this->getFlag(SEQ_EW_RIGHT) ||
+       this->getFlag(SENSOR_MODE) && this->getFlag(SEN_EW_RIGHT) ||
+       this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_RIGHT)
+       )
+        this->transitionToState(EW_BOTH_RIGHT_G, T_EW_BOTH_RIGHT_G);
+
+    else if (
+            //EW_STRAIGHT guads
+            this->getFlag(TIMER_MODE) && !this->getFlag(SEQ_EW_RIGHT) ||
+            this->getFlag(SENSOR_MODE) && !this->getFlag(SEN_EW_RIGHT) ||
+            this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_STRAIGHT) ||
+            this->getFlag(CMD_EW_PED)
+            )
+        this->transitionToState(EW_STRAIGHT, T_EW_STRAIGHT_G);
+
+    else
+        //crash
+        this->transitionToState(STARTUP, T_STARTUP);
+
 }
 
 void IntersectionController::ew_both_right_g()
 {
+    if (
+       //EW_BOTH_RIGHT_F guards
+       this->getFlag(SENSOR_MODE) ||
+       this->getFlag(TIMER_MODE)
+       )
+        this->transitionToState(EW_BOTH_RIGHT_F, T_EW_BOTH_RIGHT_F);
+
+    else
+        //crash
+        this->transitionToState(STARTUP, T_STARTUP);
+
 }
 
 void IntersectionController::ew_both_right_f()
 {
+    this->transitionToState(EW_STRAIGHT, T_EW_STRAIGHT_G);
+
 }
 
 void IntersectionController::ew_straight()
 {
+    if (
+       //EW_STRAIGHT_G_PED_G guards
+       this->getFlag(SENSOR_MODE) ||
+       this->getFlag(TIMER_MODE)
+       )
+        this->transitionToState(EW_STRAIGHT_G_PED_G, T_EW_PED_G);
+
+    else if (
+            //EW_STRAIGHT_G guards
+            this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_STRAIGHT)
+            )
+        this->transitionToState(EW_STRAIGHT_G, T_EW_STRAIGHT_G);
+
 }
 
 void IntersectionController::ew_straight_g_ped_g()
 {
+    if (
+       //EW_STRAIGHT_G_PED_F guards
+       this->getFlag(SENSOR_MODE) ||
+       this->getFlag(TIMER_MODE)
+       )
+        this->transitionToState(EW_STRAIGHT_G_PED_F, T_EW_PED_F);
+
+    else
+        //crash
+        this->transitionToState(STARTUP, T_STARTUP);
+
 }
 
 void IntersectionController::ew_straight_g_ped_f()
 {
+    this->transitionToState(EW_STRAIGHT_G, T_EW_STRAIGHT_G_QUICK);
+
 }
 
 void IntersectionController::ew_straight_g()
 {
+    if (
+       //EW_STRAIGHT_F guards
+       this->getFlag(TIMER_MODE) ||
+       this->getFlag(SENSOR_MODE) && this->getFlag(SEN_NS_STRAIGHT) ||
+       this->getFlag(SENSOR_MODE) && this->getFlag(SEN_NS_PED) ||
+       this->getFlag(SENSOR_MODE) && this->getFlag(SEN_TRAM)
+       )
+        this->transitionToState(EW_STRAIGHT_F, T_EW_STRAIGHT_F);
+
+    else
+        //EW_STRAIGHT_G
+        this->transitionToState(EW_STRAIGHT_G, T_EW_STRAIGHT_CHECK);
+
 }
 
 void IntersectionController::ew_straight_f()
 {
+    this->transitionToState(NS_CLEAR, T_NS_CLEAR);
+
 }
 
 
@@ -222,13 +335,16 @@ void IntersectionController::initialiseStates()
              NS_CLEAR_L_NS, NS_CLEAR_L_EW, 
              NS_CLEAR_F_NS, NS_CLEAR_F_EW);
 
-    mapState(NS_TRAM_G, &IntersectionController::ns_tram_g,
-             NS_TRAM_G_L_NS, NS_TRAM_G_L_EW,
-             NS_TRAM_G_F_NS, NS_TRAM_G_F_EW);
+    if (type == TRAM)
+    {
+        mapState(NS_TRAM_G, &IntersectionController::ns_tram_g,
+                 NS_TRAM_G_L_NS, NS_TRAM_G_L_EW,
+                 NS_TRAM_G_F_NS, NS_TRAM_G_F_EW);
 
-    mapState(NS_TRAM_F, &IntersectionController::ns_tram_f,
-             NS_TRAM_F_L_NS, NS_TRAM_F_L_EW,
-             NS_TRAM_F_F_NS, NS_TRAM_F_F_EW);
+        mapState(NS_TRAM_F, &IntersectionController::ns_tram_f,
+                 NS_TRAM_F_L_NS, NS_TRAM_F_L_EW,
+                 NS_TRAM_F_F_NS, NS_TRAM_F_F_EW);
+    }
 
     mapState(NS_STRAIGHT, &IntersectionController::ns_straight,
              NS_STRAIGHT_L_NS, NS_STRAIGHT_L_EW,

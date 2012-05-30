@@ -5,7 +5,8 @@
 #include "LightHandler.h"
 
 #include <vector>
-
+#include <cstdio>
+#include <iostream>
 
 namespace ControllerInfo
 {
@@ -275,11 +276,15 @@ namespace ControllerInfo
 
 }
 
+//constants for intersection type
+#define TRAM 0
+#define NOTRAM 1
+
 class IntersectionController : public AbstractController
 {
 public:
     //constructor
-    IntersectionController();
+    IntersectionController(unsigned int type);
 
     //overriding abstract methods
     virtual void trigger();
@@ -307,6 +312,9 @@ private:
 
     Light::lightString flashFlagsNS[ControllerInfo::CONTROLLER_STATE_SENTINAL];
     Light::lightString flashFlagsEW[ControllerInfo::CONTROLLER_STATE_SENTINAL];
+
+    //type of intersection controller, TRAM for 'i2', NOTRAM for 'i1' or 'i3'
+    unsigned int type;
 
 private:
     virtual void transitionToState(ControllerInfo::controllerState state, int time);
