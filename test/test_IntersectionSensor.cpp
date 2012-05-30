@@ -26,12 +26,14 @@ int main(void) {
             std::cout << "Failed to create pipe. Bailing!\n";
             exit(1);
         }
-
         write_fds[i] = pipe_fds[1];
 
         if (i < PIPES - 1)
         {
-            Sensor *sensor = new Sensor(controller, 'a' + i, i, pipe_fds[0]);
+            Sensor *sensor = new Sensor(controller, 'a' + i, i + 1, pipe_fds[0]);
+
+            std::cout << "Press " << char('a' + i) << " for " << 
+                          controllerFlagNames[i + 1] << "\n";
         }
         else 
         {
@@ -67,3 +69,4 @@ void *tick_listen(void *args)
         if ('.' == buff) 
             controller->tick();
 }
+
