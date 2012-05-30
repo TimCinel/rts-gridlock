@@ -67,7 +67,7 @@ void IntersectionController::ns_clear()
             this->getFlag(TIMER_MODE) && this->getFlag(SEQ_NS_PED)
             )
 
-        this->transitionToState(NS_STRAIGHT, 0);
+        this->transitionToState(NS_STRAIGHT, T_NS_STRAIGHT);
 
     else if (
             //EW_CLEAR guards
@@ -167,7 +167,7 @@ void IntersectionController::ew_clear()
             this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_STRAIGHT) ||
             this->getFlag(CMD_EW_PED)
             )
-        this->transitionToState(EW_STRAIGHT, T_EW_STRAIGHT_G);
+        this->transitionToState(EW_STRAIGHT, T_EW_STRAIGHT);
 
     else
         //crash
@@ -192,7 +192,7 @@ void IntersectionController::ew_both_right_g()
 
 void IntersectionController::ew_both_right_f()
 {
-    this->transitionToState(EW_STRAIGHT, T_EW_STRAIGHT_G);
+    this->transitionToState(EW_STRAIGHT, T_EW_STRAIGHT);
 
 }
 

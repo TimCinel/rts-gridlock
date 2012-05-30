@@ -85,7 +85,6 @@ namespace ControllerInfo
         SENSOR_MODE,
         TIMER_MODE,
         CONTROLLER_MODE_SENTINEL
-        TIMER_MODE
     } controllerFlag;
 
     static const char *controllerFlagNames[] = {
@@ -120,6 +119,7 @@ namespace ControllerInfo
     static const unsigned int T_STARTUP             = 15;
 
     static const unsigned int T_NS_CLEAR            = 2;
+    static const unsigned int T_NS_STRAIGHT         = 0;
     static const unsigned int T_NS_STRAIGHT_G       = 20;
     static const unsigned int T_NS_STRAIGHT_CHECK   = 5;
     static const unsigned int T_NS_STRAIGHT_G_QUICK = 5;
@@ -133,6 +133,7 @@ namespace ControllerInfo
     static const unsigned int T_EW_CLEAR            = 2;
     static const unsigned int T_EW_BOTH_RIGHT_G     = 10;
     static const unsigned int T_EW_BOTH_RIGHT_F     = 4;
+    static const unsigned int T_EW_STRAIGHT         = 0;
     static const unsigned int T_EW_STRAIGHT_G       = 20;
     static const unsigned int T_EW_STRAIGHT_CHECK   = 5;
     static const unsigned int T_EW_STRAIGHT_G_QUICK = 5;
