@@ -5,14 +5,15 @@
 #include "LightHandler.h"
 
 #include <vector>
-
+#include <cstdio>
+#include <iostream>
 
 namespace ControllerInfo
 {
 
     //STATE CONSTANTS
 
-    typedef enum controllerState 
+    typedef enum
     {
         STARTUP,
         NS_CLEAR,
@@ -32,7 +33,7 @@ namespace ControllerInfo
         EW_STRAIGHT_G,
         EW_STRAIGHT_F,
         CONTROLLER_STATE_SENTINAL
-    };
+    } controllerState;
 
     static const char *controllerStateNames[] = {
         "STARTUP",
@@ -58,7 +59,7 @@ namespace ControllerInfo
 
     //CONTROLLER CONSTANTS
 
-    typedef enum controllerFlag 
+    typedef enum 
     {
         SYSTEM_MODE,
         CMD_EW_STRAIGHT,
@@ -84,7 +85,8 @@ namespace ControllerInfo
         SENSOR_MODE,
         TIMER_MODE,
         CONTROLLER_MODE_SENTINEL
-    };
+        TIMER_MODE
+    } controllerFlag;
 
     static const char *controllerFlagNames[] = {
         "SYSTEM_MODE",
@@ -125,13 +127,16 @@ namespace ControllerInfo
     static const unsigned int T_NS_PED_G            = 20;
     static const unsigned int T_NS_PED_F            = 15;
 
+    static const unsigned int T_TRAM_G              = 10;
+    static const unsigned int T_TRAM_F              = 4;
+
     static const unsigned int T_EW_CLEAR            = 2;
     static const unsigned int T_EW_BOTH_RIGHT_G     = 10;
     static const unsigned int T_EW_BOTH_RIGHT_F     = 4;
     static const unsigned int T_EW_STRAIGHT_G       = 20;
     static const unsigned int T_EW_STRAIGHT_CHECK   = 5;
     static const unsigned int T_EW_STRAIGHT_G_QUICK = 5;
-    static const unsigned int T_EW_STRAIGHT_F       = 20;
+    static const unsigned int T_EW_STRAIGHT_F       = 4;
     static const unsigned int T_EW_PED_G            = 20;
     static const unsigned int T_EW_PED_F            = 15;
 
@@ -271,13 +276,17 @@ namespace ControllerInfo
     static const lightString EW_STRAIGHT_F_F_NS = 0;
     static const lightString EW_STRAIGHT_F_F_EW = 0;
 
-};
+}
+
+//constants for intersection type
+#define TRAM 0
+#define NOTRAM 1
 
 class IntersectionController : public AbstractController
 {
 public:
     //constructor
-    IntersectionController();
+    IntersectionController(unsigned int type);
 
     //overriding abstract methods
     virtual void trigger();
@@ -305,6 +314,9 @@ private:
 
     Light::lightString flashFlagsNS[ControllerInfo::CONTROLLER_STATE_SENTINAL];
     Light::lightString flashFlagsEW[ControllerInfo::CONTROLLER_STATE_SENTINAL];
+
+    //type of intersection controller, TRAM for 'i2', NOTRAM for 'i1' or 'i3'
+    unsigned int type;
 
 private:
     virtual void transitionToState(ControllerInfo::controllerState state, int time);

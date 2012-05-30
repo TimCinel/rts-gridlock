@@ -1,4 +1,6 @@
+#include <cstdlib>
 #include <iostream>
+
 #include "Sensor.h"
 
 Sensor::Sensor() {
@@ -44,4 +46,6 @@ void *sensor_util::listen(void *args)
     while (read(sensor->getReadFd(), &buff, 1) > 0) {
         sensor->checkTrigger(buff);
     }
+
+    return NULL;
 }
