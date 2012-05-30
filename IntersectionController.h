@@ -124,8 +124,8 @@ namespace ControllerInfo
     static const unsigned int T_NS_STRAIGHT_CHECK   = 5;
     static const unsigned int T_NS_STRAIGHT_G_QUICK = 5;
     static const unsigned int T_NS_STRAIGHT_F       = 4;
-    static const unsigned int T_NS_PED_G            = 20;
-    static const unsigned int T_NS_PED_F            = 15;
+    static const unsigned int T_NS_PED_G            = 15;
+    static const unsigned int T_NS_PED_F            = 10;
 
     static const unsigned int T_TRAM_G              = 10;
     static const unsigned int T_TRAM_F              = 4;
@@ -138,8 +138,8 @@ namespace ControllerInfo
     static const unsigned int T_EW_STRAIGHT_CHECK   = 5;
     static const unsigned int T_EW_STRAIGHT_G_QUICK = 5;
     static const unsigned int T_EW_STRAIGHT_F       = 4;
-    static const unsigned int T_EW_PED_G            = 20;
-    static const unsigned int T_EW_PED_F            = 15;
+    static const unsigned int T_EW_PED_G            = 15;
+    static const unsigned int T_EW_PED_F            = 10;
 
 
     //LIGHT CONSTANTS
