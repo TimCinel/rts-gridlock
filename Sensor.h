@@ -2,7 +2,7 @@
 #define SENSOR_H
 
 #ifndef MOCK_OBJECTS
-#include "Controller.h"
+#include "AbstractController.h"
 #else
 #include "test/mock_Controller.h"
 #endif
@@ -14,7 +14,7 @@ class Sensor {
 
 private:
     char                trigger;        //character to detect when input is read
-    Controller          *target;        //controller to set flag on
+    AbstractController  *target;        //controller to set flag on
     int                 flagPosition;   //flag to set when trigger is detected
     int                 readFd;         //file descriptor to read on
 
@@ -26,7 +26,7 @@ public:
     Sensor();
 
     //use this constructor
-    Sensor(Controller *target, char trigger, int flagPosition, int readFd);
+    Sensor(AbstractController *target, char trigger, int flagPosition, int readFd);
     ~Sensor();
 
     int getReadFd() {return this->readFd;}

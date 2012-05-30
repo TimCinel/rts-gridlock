@@ -2,13 +2,13 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-class Controller {
+class AbstractController {
 private:
     int sensorFlags;
 public:
-    Controller() { sensorFlags = 0; }
+    AbstractController() { sensorFlags = 0; }
 
-    void setSensorFlag(int flagPosition) {
+    void setFlag(int flagPosition) {
 
         sensorFlags |= 1 << flagPosition;
 
