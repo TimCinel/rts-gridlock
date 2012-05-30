@@ -278,6 +278,7 @@ mapState(controllerState state,
     this->flashFlagsNS[state] = flashFlagsNS;
     this->flashFlagsEW[state] = flashFlagsEW;
 
+    this->exitClearFlags[state] = clearFlags;
 }
 
 void IntersectionController::display()
@@ -353,7 +354,7 @@ void IntersectionController::transitionToState(controllerState state, int time)
     //TODO: Send message to controller
 
     //clear any flags before exiting current state
-    this->clearFlags(this->exitClearFlags[state]);
+    this->clearFlags(this->exitClearFlags[this->state]);
 
     //set lights
     for (unsigned int i = 0; i < this->lightsNS.size(); i++)
@@ -376,10 +377,12 @@ void IntersectionController::transitionToState(controllerState state, int time)
 
 void IntersectionController::clearFlags(int bitString)
 {
-    for (unsigned int i = 1; i < sizeof(bitString); i++)
-        if (1 & (bitString << i)) {
+    for (unsigned int i = 0; i < CONTROLLER_FLAG_SENTINEL; i++)
+        if (1 & (bitString >> i))
+        {
             this->clearFlag(i);
-            std::cout << "Clearing " << controllerStateNames[i] << "\n";
+            std::cout << "Clearing " << controllerFlagNames[i] << 
+                         " (" << i << ")\n";
         }
 }
 

@@ -324,6 +324,7 @@ public:
     //overriding abstract methods
     virtual void trigger();
 
+    virtual void clearFlag(unsigned int flag);
     virtual void setFlag(unsigned int flag);
     virtual int getFlag(unsigned int flag);
 
