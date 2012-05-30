@@ -82,7 +82,8 @@ namespace ControllerInfo
         CONTROLLER_FLAG_SENTINEL,
         COMMAND_MODE,
         SENSOR_MODE,
-        TIMER_MODE
+        TIMER_MODE,
+        CONTROLLER_MODE_SENTINEL
     };
 
     static const char *controllerFlagNames[] = {
