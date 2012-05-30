@@ -30,7 +30,7 @@ int main(void) {
 
         if (i < PIPES - 1)
         {
-            Sensor *sensor = new Sensor(controller, 'a' + i, i + 1, pipe_fds[0]);
+            new Sensor(controller, 'a' + i, i + 1, pipe_fds[0]);
 
             std::cout << "Press " << char('a' + i) << " for " << 
                           controllerFlagNames[i + 1] << "\n";
@@ -68,5 +68,7 @@ void *tick_listen(void *args)
     while (read(tick_fd, &buff, 1) > 0) 
         if ('.' == buff) 
             controller->tick();
+
+    return NULL;
 }
 
