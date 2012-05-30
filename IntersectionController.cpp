@@ -55,28 +55,28 @@ void IntersectionController::ns_clear()
 {
     if (
             //NS_TRAM_G guards
-            this->getFlag(TIMER_MODE) && this->getFlag(SEQ_TRAM) ||
-            this->getFlag(COMMAND_MODE) && this->getFlag(CMD_TRAM) ||
-            this->getFlag(SENSOR_MODE) && this->getFlag(SEN_TRAM)
+            (this->getFlag(TIMER_MODE) && this->getFlag(SEQ_TRAM)) ||
+            (this->getFlag(COMMAND_MODE) && this->getFlag(CMD_TRAM)) ||
+            (this->getFlag(SENSOR_MODE) && this->getFlag(SEN_TRAM))
        )
         this->transitionToState(NS_TRAM_G, T_TRAM_G);
 
     else if (
             //NS_STRAIGHT guards
             this->getFlag(SENSOR_MODE) ||
-            this->getFlag(COMMAND_MODE) && this->getFlag(CMD_NS_PED) ||
-            this->getFlag(COMMAND_MODE) && this->getFlag(CMD_NS_STRAIGHT) ||
-            this->getFlag(TIMER_MODE) && this->getFlag(SEQ_NS_STRAIGHT) ||
-            this->getFlag(TIMER_MODE) && this->getFlag(SEQ_NS_PED)
+            (this->getFlag(COMMAND_MODE) && this->getFlag(CMD_NS_PED)) ||
+            (this->getFlag(COMMAND_MODE) && this->getFlag(CMD_NS_STRAIGHT)) ||
+            (this->getFlag(TIMER_MODE) && this->getFlag(SEQ_NS_STRAIGHT)) ||
+            (this->getFlag(TIMER_MODE) && this->getFlag(SEQ_NS_PED))
             )
 
         this->transitionToState(NS_STRAIGHT, T_NS_STRAIGHT);
 
     else if (
             //EW_CLEAR guards
-            this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_STRAIGHT) || 
-            this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_PED) || 
-            this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_RIGHT) 
+            (this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_STRAIGHT)) || 
+            (this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_PED)) || 
+            (this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_RIGHT))
             )
 
         this->transitionToState(EW_CLEAR, T_EW_CLEAR);
@@ -95,7 +95,8 @@ void IntersectionController::ns_tram_g()
 
 void IntersectionController::ns_tram_f()
 {
-    this->transitionToState(NS_CLEAR, T_NS_CLEAR);
+    //note - previously went back to ns clear, loops permanently in timer mode
+    this->transitionToState(NS_STRAIGHT, T_NS_CLEAR);
 }
 
 void IntersectionController::ns_straight()
@@ -108,9 +109,9 @@ void IntersectionController::ns_straight()
 
     else if (
             //NS_STRAIGHT_G_PED_G guards
-            this->getFlag(TIMER_MODE) && this->getFlag(SEQ_NS_PED) ||
-            this->getFlag(SENSOR_MODE) && this->getFlag(SEN_NS_PED) ||
-            this->getFlag(COMMAND_MODE) && this->getFlag(CMD_NS_PED)
+            (this->getFlag(TIMER_MODE) && this->getFlag(SEQ_NS_PED)) ||
+            (this->getFlag(SENSOR_MODE) && this->getFlag(SEN_NS_PED)) ||
+            (this->getFlag(COMMAND_MODE) && this->getFlag(CMD_NS_PED))
             )
         this->transitionToState(NS_STRAIGHT_G_PED_G, T_NS_PED_G);
 
@@ -157,17 +158,17 @@ void IntersectionController::ew_clear()
 {
     if (
        //EW_BOTH_RIGHT guards
-       this->getFlag(TIMER_MODE) && this->getFlag(SEQ_EW_RIGHT) ||
-       this->getFlag(SENSOR_MODE) && this->getFlag(SEN_EW_RIGHT) ||
-       this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_RIGHT)
+       (this->getFlag(TIMER_MODE) && this->getFlag(SEQ_EW_RIGHT)) ||
+       (this->getFlag(SENSOR_MODE) && this->getFlag(SEN_EW_RIGHT)) ||
+       (this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_RIGHT))
        )
         this->transitionToState(EW_BOTH_RIGHT_G, T_EW_BOTH_RIGHT_G);
 
     else if (
             //EW_STRAIGHT guads
-            this->getFlag(TIMER_MODE) && !this->getFlag(SEQ_EW_RIGHT) ||
-            this->getFlag(SENSOR_MODE) && !this->getFlag(SEN_EW_RIGHT) ||
-            this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_STRAIGHT) ||
+            (this->getFlag(TIMER_MODE) && !this->getFlag(SEQ_EW_RIGHT)) ||
+            (this->getFlag(SENSOR_MODE) && !this->getFlag(SEN_EW_RIGHT)) ||
+            (this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_STRAIGHT)) ||
             this->getFlag(CMD_EW_PED)
             )
         this->transitionToState(EW_STRAIGHT, T_EW_STRAIGHT);
@@ -242,9 +243,9 @@ void IntersectionController::ew_straight_g()
     if (
        //EW_STRAIGHT_F guards
        this->getFlag(TIMER_MODE) ||
-       this->getFlag(SENSOR_MODE) && this->getFlag(SEN_NS_STRAIGHT) ||
-       this->getFlag(SENSOR_MODE) && this->getFlag(SEN_NS_PED) ||
-       this->getFlag(SENSOR_MODE) && this->getFlag(SEN_TRAM)
+       (this->getFlag(SENSOR_MODE) && this->getFlag(SEN_NS_STRAIGHT)) ||
+       (this->getFlag(SENSOR_MODE) && this->getFlag(SEN_NS_PED)) ||
+       (this->getFlag(SENSOR_MODE) && this->getFlag(SEN_TRAM))
        )
         this->transitionToState(EW_STRAIGHT_F, T_EW_STRAIGHT_F);
 
@@ -281,28 +282,69 @@ mapState(controllerState state,
 
 void IntersectionController::display()
 {
-   //vars
-   /*
-   printf("        x x x        \n");
+   //vars north-south
+   unsigned char ns_g, ns_a, ns_r;
+   unsigned char ns_t_w, ns_t_a;
+   unsigned char ns_p_g, ns_p_r;
+
+   lightsNS[0]->getLights() & (1 << CAR_STRAIGHT_GO) ? ns_g = 'G' : ns_g = ' ';
+   lightsNS[0]->getLights() & (1 << CAR_STRAIGHT_FINISH) ? ns_a = 'A' : ns_a = ' ';
+   lightsNS[0]->getLights() & (1 << CAR_STRAIGHT_STOP) ? ns_r = 'R' : ns_r = ' ';
+
+   lightsNS[0]->getLights() & (1 << TRAM_GO) ? ns_t_w = 'W' : ns_t_w = ' ';
+   lightsNS[0]->getLights() & (1 << TRAM_FINISH) ? ns_t_a = 'A' : ns_t_a = ' ';
+
+   lightsNS[0]->getLights() & (1 << PEDESTRIAN_GO) ? ns_p_g = 'G' : ns_p_g = ' ';
+   lightsNS[0]->getLights() & (1 << PEDESTRIAN_STOP) ? ns_p_r = 'R' : ns_p_r = ' ';
+
+   //sensors north-south
+   unsigned char ns, ns_t, ns_p;
+
+   flags[SEN_NS_STRAIGHT] ? ns = 'X' : ns = ' ';
+   flags[SEN_TRAM] ? ns_t = 'X' : ns_t = ' ';
+   flags[SEN_NS_PED] ? ns_p = 'X' : ns_p = ' ';
+
+   //vars east-west
+   unsigned char ew_g, ew_a, ew_r;
+   unsigned char ew_t_g, ew_t_a;
+   unsigned char ew_p_g, ew_p_r;
+
+   lightsEW[0]->getLights() & (1 << CAR_STRAIGHT_GO) ? ew_g = 'G' : ew_g = ' ';
+   lightsEW[0]->getLights() & (1 << CAR_STRAIGHT_FINISH) ? ew_a = 'A' : ew_a = ' ';
+   lightsEW[0]->getLights() & (1 << CAR_STRAIGHT_STOP) ? ew_r = 'R' : ew_r = ' ';
+
+   lightsEW[0]->getLights() & (1 << CAR_RIGHT_GO) ? ew_t_g = 'G' : ew_t_g = ' ';
+   lightsEW[0]->getLights() & (1 << CAR_RIGHT_FINISH) ? ew_t_a = 'A' : ew_t_a = ' ';
+
+   lightsEW[0]->getLights() & (1 << PEDESTRIAN_GO) ? ew_p_g = 'G' : ew_p_g = ' ';
+   lightsEW[0]->getLights() & (1 << PEDESTRIAN_STOP) ? ew_p_r = 'R' : ew_p_r = ' ';
+
+   //sensors east-west
+   unsigned char ew, ew_t, ew_p;
+
+   flags[SEN_EW_STRAIGHT] ? ew = 'X' : ew = ' ';
+   flags[SEN_EW_RIGHT] ? ew_t = 'X' : ew_t = ' ';
+   flags[SEN_EW_PED] ? ew_p = 'X' : ew_p = ' ';
+
+   printf("        %c %c %c        \n", ns, ns_t, ns_p);
    printf("        - - -        \n");
-   printf("       |G|W|G|       \n");
-   printf("       |A|A|R|       \n");
-   printf("       |R|- -        \n");
+   printf("       |%c|%c|%c|       \n", ns_g, ns_t_w, ns_p_g);
+   printf("       |%c|%c|%c|       \n", ns_a, ns_t_a, ns_p_r);
+   printf("       |%c|- -        \n", ns_r);
    printf("        -            \n");
    printf("  --             --  \n");
-   printf("x|GR|           |RG|x\n");
+   printf("%c|%c%c|          |%c%c%c|%c\n", ew_p, ew_p_g, ew_p_r, ew_r, ew_a, ew_g, ew);
    printf("  --             --  \n");
-   printf("x|WA|           |AW|x\n");
+   printf("%c|%c%c|           |%c%c|%c\n", ew_t, ew_t_a, ew_t_g, ew_t_g, ew_t_a, ew_t);
    printf("  ---           ---  \n");
-   printf("x|GAR|         |RAG|x\n");
+   printf("%c|%c%c%c|          |%c%c|%c\n", ew, ew_g, ew_a, ew_r, ew_p_r, ew_p_g, ew_p);
    printf("  ---           ---  \n");
    printf("            -        \n");
-   printf("        - -|R|       \n");
-   printf("       |R|A|A|       \n");
-   printf("       |G|W|G|       \n");
+   printf("        - -|%c|       \n", ns_r);
+   printf("       |%c|%c|%c|       \n", ns_p_r, ns_t_a, ns_a);
+   printf("       |%c|%c|%c|       \n", ns_p_g, ns_t_w, ns_g);
    printf("        - - -        \n");
-   printf("        x x x        \n");
-   */
+   printf("        %c %c %c        \n", ns_p, ns_t, ns);
 }
 
 
@@ -327,6 +369,8 @@ void IntersectionController::transitionToState(controllerState state, int time)
 
     std::cout << "Transitioning to state: " << controllerStateNames[state] << "\n";
     std::cout << "Time: " << time << "\n";
+
+    this->display();
 
 }
 
@@ -454,6 +498,8 @@ void IntersectionController::initialiseStates()
     this->setFlag(TIMER_MODE);
 
     //default sequence
+    if (type == TRAM)
+        this->setFlag(SEQ_TRAM);
     this->setFlag(SEQ_NS_STRAIGHT);
     this->setFlag(SEQ_NS_PED);
 
