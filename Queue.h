@@ -43,31 +43,20 @@ class Queue
 {
 
     private:
-        pthread_t  t_thread;
-        pthread_mutex_t mutex;
-        char*     name;
-        unsigned int simonsConstant;
-        struct mq_attr attr;
+        pthread_t       t_thread;
+        char*           name;
+        struct mq_attr  attr;
 
     public:
         AbstractController* controller;
-        /* Constructor:
-         * "name" is the name of the local mqueue (i1, i2, i3, central) */
+
         Queue(char*, AbstractController*);
-        
         ~Queue();
 
-        char* get_name() {return name;}
-        struct mq_attr* getAttr() {return &attr;}
-
-        void set_name(char* name) {this->name = name;}
-        AbstractController* getController() {return controller;}
-
-        void downMutex();
-        void upMutex();
-        int getSimonsConstant();
-        void setSimonsConstant();
-        void clearSimonsConstant();
+        char* get_name();
+        struct mq_attr* getAttr();
+        void set_name(char* name);
+        AbstractController* getController();
 };
 
 void* read_queue(void* args);

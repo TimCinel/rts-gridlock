@@ -3,7 +3,7 @@ SRCS		:= $(wildcard *.cpp)
 OBJS		:= ${SRCS:.cpp=.o}
 
 CC     		:= g++
-CCFLAGS		:= -O0 -g -Wall -pedantic
+CCFLAGS		:= -O0 -g -Wall -pedantic -std=c++0x
 LDFLAGS		:= 
 TESTFLAGS	:= -DMOCK_OBJECTS
 

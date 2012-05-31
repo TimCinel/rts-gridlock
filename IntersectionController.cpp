@@ -4,16 +4,10 @@ using namespace ControllerInfo;
 
 IntersectionController::IntersectionController(unsigned int type, char* inq)
 {
-    std::cout << "Constructor\n";
-
     this->type = type;
-
     this->initialiseStates();
-
     inQueue = new Queue(inq, this);
-
     this->initClock();
-
 }
 
 void IntersectionController::receiveMessage(char *sender, int header, int msg) {
