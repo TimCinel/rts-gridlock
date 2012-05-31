@@ -1,20 +1,16 @@
 #include <string>
+#include <cstdio>
 #include <unistd.h>
 #include "../Queue.h"
+#include <iostream>
 
 int main(void) {
-    //AbstractController *mock = new AbstractController();
     char* name = "/i1";
-    mq_message mes;
 
-    mes.header = MODE_CHANGE;
-    mes.sender = "Wayne";
-    mes.msg = 0;
-    
-    SendMessage(name, &mes);
-    sleep(1);
-    Queue q(name);
-    sleep(1);
-    SendMessage(name, &mes);
-    sleep(1);
+    Queue q(name, NULL);
+    write_queue(name, 1, "Wayne", 0);
+    write_queue(name, 2, "Simon", 0);
+    write_queue(name, 3, "Tim", 0);
+    write_queue(name, 4, "Barry", 0);
+    sleep(10);
 }

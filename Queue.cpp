@@ -3,12 +3,12 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 
-Queue::Queue(char* name)
+Queue::Queue(char* name, AbstractController* controller)
 {
 
     this->name = name;
-    //this->controller = controller;
 
     //optional placeholders in case attr is brought back
     attr.mq_maxmsg = 100;
@@ -16,87 +16,135 @@ Queue::Queue(char* name)
     attr.mq_flags = 0;
 
     // Create the thread
-    pthread_create (&t_thread, NULL, Read, this);
-    
+    mutex = PTHREAD_MUTEX_INITIALIZER;
+    simonsConstant = 0;
+    pthread_create (&t_thread, NULL, read_queue, this);
+    std::cout << "Opened queue " << name << "\n";
 }
 
 Queue::~Queue()
 {
-    //mq_close(qr);
-    //mq_unlink(name);
+    mq_unlink(name);
 }
 
-void* Read(void* args)
+void* read_queue(void* args)
 {
     Queue *queue = (Queue *)args;
-    
-        struct mq_attr attr;
-        mqd_t qr = 0;     // 
-        mq_message buf;      // struct to store the message
-        char* hamburgler;    // char* for the above struct to pass to mq
-        char* name;
 
-        //if ((qr = mq_open(name, O_RDONLY)) != -1)
-        //buf = queue->get_buf();
-        //qr = queue->get_qr();
-        //attr = queue->get_attr();
-        name = queue->get_name();
+    mqd_t qr;
+    mq_message buf;      // struct to store the message
+    char* hamburgler;    // char* for the above struct to pass to mq
 
-        mq_getattr(qr, &attr);
-        hamburgler = (char*)((void*)&buf);
-        
+    hamburgler = (char*)((void*)&buf);
             
-    if ((qr = mq_open(name, Q_FLAGS, Q_PERM, NULL)) != -1)
+    while (1)
     {
-        printf("queue created on %d\n", (int)qr);
-        while (1)
+        //while(!queue->getSimonsConstant());
+        //std::cout << "queueconsumerdown...";
+        //queue->downMutex();
+
+        if ((qr = mq_open(queue->get_name(), O_RDONLY, S_IRUSR, queue->getAttr())) < 0)
         {
-            //printf ("max. %u msgs, %u bytes; waiting: %u\n",
-                    //attr.mq_maxmsg, attr.mq_msgsize, attr.mq_curmsgs);
-            while (mq_receive(qr, hamburgler, strlen(hamburgler), NULL) > 0)
-            {
-                //printf("dequeue: '%s'\n", buf);
-                if (buf.header == MODE_CHANGE) {
-                    //controller->setFlag(buf.msg);
-                }
-                else if (buf.header == MODE_REQUEST)
-                {
-                    // reply with message containing expected mode
-                    
-                }
-                else if (buf.header == STATUS_NOTIFY)
-                {
-                    // message is an int containing state
-                    //mq_q.push()
-                    
-                }
-            }
-        } 
-    } else {
-        perror("err");
+            std::cout << "Could not open Queue "<< queue->get_name() << "\n";
+            //queue->upMutex();
+            continue;
+        }
+
+        //std::cout << queue->getAttr()->mq_maxmsg << " max, " << queue->getAttr()->mq_msgsize << "size, " << queue->getAttr()->mq_curmsgs << " messages";
+
+        if (mq_receive(qr, hamburgler, MESSAGESIZE, NULL) < 0)
+        {
+            //perror("error");
+            mq_close(qr);
+            //std::cout << "queueconsumerup!\n";
+            //queue->upMutex();
+            continue;
+        }
+
+        std::cout << "dequeue: " << buf.header << ", " << buf.sender << ", " << buf.msg << "\n";
+
+        if (buf.header == MODE_CHANGE) {
+            //queue->getController()->setFlag(buf.msg);
+        }
+        else if (buf.header == MODE_REQUEST)
+        {
+            // reply with message containing expected mode
+        }
+        else if (buf.header == STATUS_NOTIFY)
+        {
+            // message is an int containing state
+            //mq_q.push()
+        }
+
+        mq_close(qr);
+
+        //std::cout << "queueconsumerup!\n";
+        //queue->upMutex();
+        //queue->clearSimonsConstant();
     }
     return NULL;
 }
 
-void SendMessage(char *dest, mq_message* msg)
+void write_queue(char *dest, int header, char* sender, int msg)
 {
 
     mqd_t    qs;                     // queue for sending
     char* cast_msg;
+    mq_message message;
+    struct mq_attr attr;
 
-    cast_msg = (char*)((void*)msg);
+    message.header = header;
+    sprintf(message.sender, sender);
+    message.msg = msg;
+
+    attr.mq_maxmsg = 100;
+    attr.mq_msgsize = MESSAGESIZE;
+    attr.mq_flags = 0;
+
+    cast_msg = (char*)&message;
     
-    if ((qs = mq_open(dest, O_RDWR)) != -1)
+    //while(getSimonsConstant());
+    //std::cout << "queueproducerdown...";
+    //downMutex();
+
+    if ((qs = mq_open(dest, Q_FLAGS, Q_PERM, &attr)) >= 0)
     {
-        if (mq_send(qs, cast_msg, strlen(cast_msg), 0) != -1)
-        {
-            printf("sent something on %d\n", (int)qs);
-        }
+        if (mq_send(qs, cast_msg, sizeof(message), 0) < 0)
+            std::cout << "Error: Unable to send message\n";
         else
-        {
-            printf("Error: Unable to send message\n");
-        }
+            std::cout << "Sent '" << cast_msg << "'i\n";
+        //std::cout << "queueproducerup!\n";
+        mq_close(qs);
     } else {
-        perror("Unable to open queue - ");
+        std::cout << "Unable to open queue " << dest << "\n";
     }
+
+    //upMutex();
+    //setSimonsConstant();
 }
+
+void Queue::downMutex()
+{
+    pthread_mutex_lock(&mutex);
+}
+
+void Queue::upMutex()
+{
+    pthread_mutex_unlock(&mutex);
+}
+
+int Queue::getSimonsConstant()
+{
+    return simonsConstant;
+}
+
+void Queue::setSimonsConstant()
+{
+    simonsConstant = 1;
+}
+
+void Queue::clearSimonsConstant()
+{
+    simonsConstant = 0;
+}
+
