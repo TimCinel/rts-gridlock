@@ -28,6 +28,7 @@ void IntersectionController::trigger()
 
 void IntersectionController::setFlag(unsigned int flag)
 {
+    //TODO: Semaphore
     if (flag < CONTROLLER_FLAG_SENTINEL)
         //regular case - just set the flag
         this->flags[flag % CONTROLLER_FLAG_SENTINEL] = 1;
@@ -38,6 +39,7 @@ void IntersectionController::setFlag(unsigned int flag)
 
 int IntersectionController::getFlag(unsigned int flag) 
 {
+    //TODO: Semaphore
     if (flag < CONTROLLER_FLAG_SENTINEL)
         return this->flags[flag % CONTROLLER_FLAG_SENTINEL];
     else
@@ -45,6 +47,7 @@ int IntersectionController::getFlag(unsigned int flag)
 }
 
 void IntersectionController::clearFlag(unsigned int flag) {
+    //TODO: Semaphore
     this->flags[flag % CONTROLLER_FLAG_SENTINEL] = 0;
 }
 
@@ -392,6 +395,9 @@ void IntersectionController::initialiseStates()
 {
     std::cout << "initialiseStates\n";
 
+    //clear all flags 
+    this->clearFlags(0xFFFF);
+
     //populate state map
     mapState(STARTUP, &IntersectionController::startup, 
              STARTUP_L_NS, STARTUP_L_EW, 
@@ -497,7 +503,6 @@ void IntersectionController::initialiseStates()
     lightConf = (NOTRAM == this->type ?  I1_I3_EW_LIGHT_CONF : I2_EW_LIGHT_CONF);
 
     this->lightsEW.push_back(new LightHandler(lightConf));
-
 
     //default to sequence mode
     this->setFlag(TIMER_MODE);

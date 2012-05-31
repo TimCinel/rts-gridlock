@@ -9,34 +9,35 @@ namespace CentralInfo {
     typedef enum {
         INITIALISE,
         LISTEN,
-        CHANGE_MODE,
+        SEND_MODE,
         CENTRAL_STATES_SENTINEL
-    } CENTRAL_STATES;
+    } centralState;
 }
 
 class CentralController : public AbstractController
 {
 public:
     //constructor
-    CentralController();
+    CentralController(vector<string> intersectionNames);
     virtual ~CentralController();
 
     //functions
     virtual void trigger() = 0;
     void tick();
 
+    virtual void receiveMessage(char *sender, int header, int msg) = 0;
     virtual void clearFlag(unsigned int flag) = 0;
     virtual void setFlag(unsigned int flag) = 0;
     virtual int getFlag(unsigned int flag) = 0;
 
 private:
     //instance variables
-
-    unsigned int flags[ControllerInfo::CONTROLLER_FLAG_SENTINEL];
+    CentralInfo::centralState state;
     void (CentralController::*stateRecord
             [CentralInfo::CENTRAL_STATES_SENTINEL])();
 
-    vector<IntersectionRecord> 
+    unsigned int flags[ControllerInfo::CONTROLLER_FLAG_SENTINEL];
+    map<string, IntersectionRecord> intersections;
 
 };
 

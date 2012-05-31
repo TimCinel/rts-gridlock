@@ -19,6 +19,7 @@ public:
     inline void resetTimer(int time) { this->time = time; }
     inline int getTime() { return this->time; }
 
+    virtual void receiveMessage(char *sender, int header, int msg) = 0;
     virtual void clearFlag(unsigned int flag) = 0;
     virtual void setFlag(unsigned int flag) = 0;
     virtual int getFlag(unsigned int flag) = 0;

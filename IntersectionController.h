@@ -62,12 +62,6 @@ namespace ControllerInfo
     typedef enum 
     {
         SYSTEM_MODE,
-        CMD_EW_STRAIGHT,
-        CMD_EW_PED,
-        CMD_EW_RIGHT,
-        CMD_NS_STRAIGHT,
-        CMD_NS_PED, 
-        CMD_TRAM, 
         SEN_EW_STRAIGHT,
         SEN_EW_PED,
         SEN_EW_RIGHT,
@@ -80,6 +74,13 @@ namespace ControllerInfo
         SEQ_NS_STRAIGHT,
         SEQ_NS_PED, 
         SEQ_TRAM, 
+        CONTROLLER_COMMAND_SENTINEL,
+        CMD_EW_STRAIGHT,
+        CMD_EW_PED,
+        CMD_EW_RIGHT,
+        CMD_NS_STRAIGHT,
+        CMD_NS_PED, 
+        CMD_TRAM, 
         CONTROLLER_FLAG_SENTINEL,
         COMMAND_MODE,
         SENSOR_MODE,
@@ -89,12 +90,6 @@ namespace ControllerInfo
 
     static const char *controllerFlagNames[] = {
         "SYSTEM_MODE",
-        "CMD_EW_STRAIGHT",
-        "CMD_EW_PED",
-        "CMD_EW_RIGHT",
-        "CMD_NS_STRAIGHT",
-        "CMD_NS_PED",
-        "CMD_TRAM",
         "SEN_EW_STRAIGHT",
         "SEN_EW_PED",
         "SEN_EW_RIGHT",
@@ -107,11 +102,24 @@ namespace ControllerInfo
         "SEQ_NS_STRAIGHT",
         "SEQ_NS_PED", 
         "SEQ_TRAM", 
+        "CONTROLLER_COMMAND_SENTINEL",
+        "CMD_EW_STRAIGHT",
+        "CMD_EW_PED",
+        "CMD_EW_RIGHT",
+        "CMD_NS_STRAIGHT",
+        "CMD_NS_PED",
+        "CMD_TRAM",
         "CONTROLLER_FLAG_SENTINEL",
         "COMMAND_MODE",
         "SENSOR_MODE",
         "TIMER_MODE"
+        "CONTROLLER_MODE_SENTINEL"
     };
+
+    typedef enum {
+        SET_CONTROLLER_FLAG,
+        CLEAR_CONTROLLER_FLAG
+    } intersectionHeader;
 
 
     //TIME CONSTANTS

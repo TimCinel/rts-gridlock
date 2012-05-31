@@ -5,22 +5,16 @@
 
 
 int main(void) {
-    Controller *mock = new Controller();
+    AbstractController *mock = new AbstractController();
 
-    int pipe_fds[2];
     int write_fds[26];
 
     for (int i = 0; i < 26; i++) {
 
-        if (pipe(pipe_fds) != 0) {
-            std::cout << "Failed to create pipe. Bailing!\n";
-            exit(1);
-        }
-
-        write_fds[i] = pipe_fds[1];
-
         std::cout << "Creating sensor #" << i << "\n";
-        Sensor *sensor = new Sensor(mock, 'a' + i, i, pipe_fds[0]);
+        Sensor *sensor = new Sensor(mock, 'a' + i, i);
+        write_fds[i] = sensor->getWriteFD();
+
     }
 
     char buff;
