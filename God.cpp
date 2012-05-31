@@ -7,8 +7,7 @@
 
 using namespace ControllerInfo;
 
-void central();
-void intersection();
+void *remoteRunner(void *args);
 void *sensorListener(void *args);
 
 std::vector<RemoteController *> remotes;
