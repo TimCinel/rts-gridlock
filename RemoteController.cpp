@@ -1,6 +1,6 @@
-#include "IntersectionRecord.h"
+#include "RemoteController.h"
 
-IntersectionRecord::IntersectionRecord(char *machineName, 
+RemoteController::RemoteController(char *machineName, 
         CentralController *controller) 
 {
     this->machineName = machineName;
@@ -13,7 +13,7 @@ IntersectionRecord::IntersectionRecord(char *machineName,
 
 }
 
-~IntersectionRecord()
+~RemoteController()
 {
     if (this->incoming)
         delete this->incoming;
