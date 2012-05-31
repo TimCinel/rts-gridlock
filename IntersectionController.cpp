@@ -393,7 +393,6 @@ void IntersectionController::display()
    printf("|       | - - - |       |\n");
    printf("|       | %c %c %c |       |\n", ns_p, ns_t, ns);
    printf(" ----------------------- \n");
-   printf("\n");
 }
 
 
@@ -416,10 +415,7 @@ void IntersectionController::transitionToState(controllerState state, int time)
     this->resetTimer(time);
     this->state = state;
 
-    std::cout << "Transitioning to state: " << controllerStateNames[state] << "\n";
-    std::cout << "Time: " << time << "\n";
-
-    this->display();
+    std::cout << "Transition to state: " << controllerStateNames[state] << "\n";
 
 }
 

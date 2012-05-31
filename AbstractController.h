@@ -16,6 +16,7 @@ class AbstractController
         virtual void clearFlag(unsigned int flag) = 0;
         virtual void setFlag(unsigned int flag) = 0;
         virtual int getFlag(unsigned int flag) = 0;
+        virtual void display() = 0;
 
         void tick();
         void resetTimer(int time);

@@ -11,8 +11,10 @@ void AbstractController::tick()
         pthread_mutex_lock(&mutex);
 
         this->time--;
-        std::cerr << "Time: " << this->time << "\n";
+        std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n";
         this->trigger();
+        display();
+        std::cout << "Time: " << this->time << "\n";
 
         std::cerr << "consumerup!";
         pthread_mutex_unlock(&mutex);
