@@ -97,8 +97,13 @@ void RemoteController::receiveMessage(char *sender, int header, int msg)
 void RemoteController::clearFlag(unsigned int flag)
 {
     //TODO: Semaphore down
+ 
     //NOTE: this SETS the bit in flagsToClear
-    this->flagsToClear &= (1 << flag);
+    this->flagsToClear |= (1 << flag);
+
+    //clear the same bit if it's in flagsToSet
+    this->flagsToSet &= ~(1 << flag);
+
     //TODO: Semaphore up
 
     std::cout << "The flag `" << controllerFlagNames[flag] << "` has been cleared\n";
@@ -107,8 +112,13 @@ void RemoteController::clearFlag(unsigned int flag)
 void RemoteController::setFlag(unsigned int flag)
 {
     //TODO: Semaphore down
+ 
     //sets bit in flagsToSet
     this->flagsToSet |= (1 << flag);
+
+    //remove from flagsToClear
+    this->flagsToClear &= ~(1 << flag);
+
     //TODO: Semaphore up
 
     std::cout << "The flag `" << controllerFlagNames[flag] << "` (" << flag <<

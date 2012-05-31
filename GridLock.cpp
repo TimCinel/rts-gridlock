@@ -233,13 +233,16 @@ int GridLock::selectCommand()
 void GridLock::showIntersections()
 {
     printf("\n\n\n");
-    printf("change mode\n");
-    printf("-----------\n");
+    printf("remote intersections\n");
+    printf("--------------------\n");
     for (unsigned int i = 0 ; i < remotes.size(); i++)
         printf("%d. %s\n", i + 1, remotes[i]->getIntersectionName());
-    printf("-----------\n\n");
+    printf("--------------------\n\n");
 
-    int option = readInt(1, 3);
+    int option = readInt(1, remotes.size());
+
+    if (option > 0)
+        intersectionMenu(remotes[(option - 1) % remotes.size()]);
 }
 
 void GridLock::monitorIntersections()
@@ -250,12 +253,62 @@ void GridLock::monitorIntersections()
 
 void GridLock::intersectionMenu(RemoteController *remote)
 {
-    cout << "intersectionMenu\n";
+    printf("\n\n\n");
+    printf("%s\n", remote->getIntersectionName());
+    printf("--------------------\n");
+    printf("1. Change mode\n");
+    printf("2. Change sequence\n");
+    printf("--------------------\n\n");
+
+    int option = readInt(1, 2);
+
+    if (1 == option)
+        changeMode(remote);
+    else if (2 == option)
+        changeSequence(remote);
+
 }
 
 void GridLock::changeSequence(RemoteController *remote)
 {
-    cout << "changeSequence\n";
+    printf("\n\n\n");
+    printf("Change Sequence for %s\n", remote->getIntersectionName());
+    printf("---------------------------\n");
+
+    static int range = CONTROLLER_COMMAND_SENTINEL -
+                       CONTROL_SEQUENCE_SENTINEL - 1;
+    static int offset = CONTROL_SEQUENCE_SENTINEL + 1;
+
+    int i, j, option;
+
+    do {
+
+        for (i = 0; i < range; i++) 
+            printf("%d. Set %s\n", i + 1, controllerFlagNames[i + offset]);
+
+        printf("- - - - - - - - - - \n");
+
+        for (j = 0; j < range; j++) 
+            printf("%d. Clear %s\n", i + j + 1, controllerFlagNames[j + offset]);
+
+        printf("- - - - - - - - - - \n");
+
+        printf("%d. Done\n", j + i + 1);
+        printf("---------------------------\n\n");
+
+        option = readInt(1, i + j);
+
+        if (option > 0 && option <= i) 
+        {
+            remote->setFlag(offset + option - 1);
+        }
+        else if (option > i)
+        {
+            remote->clearFlag(offset + option - 1 - i);
+        }
+
+    } while (option > 0);
+
 }
 
 
