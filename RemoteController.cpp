@@ -12,7 +12,6 @@ RemoteController::RemoteController(const std::string &centralName,
     //create a Queue and receive messages from the intersection
     this->incoming = NULL;
     this->incoming = new Queue((char *)this->centralName, this);
-
 }
 
 RemoteController::~RemoteController()
@@ -106,10 +105,11 @@ void RemoteController::setFlag(unsigned int flag)
 {
     //TODO: Semaphore down
     //sets bit in flagsToSet
-    this->flagsToSet &= (1 << flag);
+    this->flagsToSet |= (1 << flag);
     //TODO: Semaphore up
 
-    std::cout << "The flag `" << controllerFlagNames[flag] << "` has been set\n";
+    std::cout << "The flag `" << controllerFlagNames[flag] << "` (" << flag <<
+                 ") has been set\n";
 
     //the flag being set is a mode-setting one, update 'mode' accordingly
     if (flag > CONTROLLER_FLAG_SENTINEL && flag < CONTROLLER_MODE_SENTINEL)

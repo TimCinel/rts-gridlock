@@ -71,8 +71,8 @@ public:
 
     virtual void display();
 
-private:
-    void createSensors();
+    inline const char *getCentralName() { return this->centralName; }
+    inline const char *getIntersectionName() { return this->intersectionName; }
 };
 
 #endif

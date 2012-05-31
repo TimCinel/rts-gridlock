@@ -56,9 +56,11 @@ void* read_queue(void* args)
             
     while (1)
     {
+
         if ((qr = mq_open(queue->get_name(), O_CREAT | O_RDONLY, S_IRUSR, queue->getAttr())) < 0)
         {
             std::cerr << "Could not open Queue "<< queue->get_name() << "(read)\n";
+            sleep(1);
             continue;
         }
 
@@ -68,6 +70,7 @@ void* read_queue(void* args)
         {
             perror("Error");
             mq_close(qr);
+            sleep(1);
             continue;
         }
 
@@ -76,7 +79,9 @@ void* read_queue(void* args)
         queue->controller->receiveMessage(buf.sender, buf.header, buf.msg);
 
         mq_close(qr);
+        sleep(1);
     }
+
     return NULL;
 }
 

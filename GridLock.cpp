@@ -27,8 +27,8 @@ int main(int argc, char **argv) {
 
         //create monitors to monitor intersection instances
         remotes.push_back(new RemoteController(string(centralName) + "1", string(intersectionName) + "1"));
-        //remotes.push_back(new RemoteController(string(string(name) + "2")));
-        //remotes.push_back(new RemoteController(string(string(name) + "3")));
+        //remotes.push_back(new RemoteController(string(centralName) + "2", string(intersectionName) + "2"));
+        //remotes.push_back(new RemoteController(string(centralName) + "3", string(intersectionName) + "3"));
 
 
         for (unsigned int i = 0; i < remotes.size(); i++)
@@ -61,15 +61,11 @@ int main(int argc, char **argv) {
         //create the IntersectionController
         AbstractController *controller = 
             new IntersectionController(tram, 
-                                       string(centralName), 
+                                       string(centralName),
                                        string(intersectionName)
                                       );
 
         //set up sensors
-        sensors.push_back(new Sensor(controller, '1', TIMER_MODE));
-        sensors.push_back(new Sensor(controller, '2', SENSOR_MODE));
-        sensors.push_back(new Sensor(controller, '3', COMMAND_MODE));
-
         sensors.push_back(new Sensor(controller, 'q', SEN_NS_PED));
         sensors.push_back(new Sensor(controller, 'w', SEN_NS_STRAIGHT));
         sensors.push_back(new Sensor(controller, 'e', SEN_TRAM));
@@ -109,14 +105,16 @@ void GridLock::centralMenu()
 {
     int option;
 
-    do {
+    do 
+    {
         printf("gridlock\n");
         printf("========\n");
         printf("1. Change mode (all intersections)\n");
         printf("2. Configure intersections\n");
         printf("3. Monitor intersections\n");
+        printf("-----------\n\n");
 
-        std::cin >> option;
+        option = readInt(0, 3);
 
         switch (option) {
             case 1:
@@ -129,8 +127,6 @@ void GridLock::centralMenu()
                 monitorIntersections();
                 break;
         }
-
-        option = readInt(0, 3);
 
     } while (true);
 
@@ -156,12 +152,50 @@ int GridLock::readInt(int min, int max)
 
 void GridLock::changeMode(RemoteController *remote)
 {
-    cout << "changeMode\n";
+    printf("\n\n\n");
+    printf("change mode\n");
+    printf("-----------\n");
+    printf("1. Timer mode\n");
+    printf("2. Sensor mode\n");
+    printf("3. Command mode\n");
+    printf("-----------\n\n");
+
+    int option = readInt(1, 3);
+    int mode;
+
+    switch (option)
+    {
+        case 1:
+            mode = TIMER_MODE;
+            break;
+        case 2:
+            mode = SENSOR_MODE;
+            break;
+        case 3:
+            mode = COMMAND_MODE;
+            break;
+        default:
+            printf("Unrecognised option.\n");
+            return;
+    }
+
+    if (NULL != remote)
+        remote->setFlag(mode);
+    else
+        for (unsigned int i = 0; i < remotes.size(); i++)
+            remotes[i]->setFlag(mode);
 }
 
 void GridLock::showIntersections()
 {
-    cout << "showIntersections\n";
+    printf("\n\n\n");
+    printf("change mode\n");
+    printf("-----------\n");
+    for (unsigned int i = 0 ; i < remotes.size(); i++)
+        printf("%d. %s\n", i + 1, remotes[i]->getIntersectionName());
+    printf("-----------\n\n");
+
+    int option = readInt(1, 3);
 }
 
 void GridLock::monitorIntersections()
@@ -184,7 +218,10 @@ void GridLock::changeSequence(RemoteController *remote)
 void *GridLock::remoteRunner(void *args) {
     RemoteController *remote = (RemoteController *)args;
 
-    remote->tick();
+    while (true) {
+        sleep(1);
+        remote->trigger();
+    }
 
     return NULL;
 }
