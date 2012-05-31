@@ -16,44 +16,56 @@
 
 #include <mqueue.h>
 #include <sys/stat.h>
+#include <pthread.h>
+#include <sys/queue.h>
 #include "AbstractController.h"
 
 #define MESSAGESIZE 40
 #define Q_FLAGS     O_RDWR | O_CREAT
 #define Q_PERM      S_IRUSR | S_IWUSR | S_IROTH
 
-#define NAMESIZE 20
+#define MODE_CHANGE    1
+#define MODE_REQUEST   2
+#define STATUS_NOTIFY  3
 
-class Queue {
+typedef struct
+{
+    int header;
+    char *sender;
+    int msg;
+} mq_message;
+
+class Queue
+{
 
     private:
-       mqd_t    qd;
-       mqd_t    qr;                     // queue for receiving
-       char     buf[MESSAGESIZE];       //message being passed
-       char     name[NAMESIZE];
-       AbstractController* controller;
+        //mqd_t    qr;                     // queue for receiving
+        //queue<int> mq_q;               // empty queue of messages used for 
+        pthread_t  t_thread;
+        //mq_Message* buf;
+        char*     name;
+       // Controller* controller;
 
-       struct mq_attr attr;
+        struct mq_attr attr;
 
     public:
         /* Constructor:
          * "name" is the name of the local mqueue (i1, i2, i3, central) */
-        Queue(char* name);
+        Queue(char* name/*, Controller* controller*/);
         
         ~Queue();
 
+        char* get_name() {return name;}
+        /*mqd_t get_qr() {return qr;}
+        mq_Message* get_buf() {return buf;}
+        mq_attr get_attr() {return attr;}*/
 
-        /* reads the queue qd, requires it's own thread. This should probably
-         * just be called by the constructor, */
-        void Read();
-
-        /* this is the method used by intersection controllers, dest will always
-         * be central */
-        void SendMessage(char *msg);
-
-        /* this is used by central controller, dest can be i1, i2, i3 */
-        void SendMessage(char *dest, char *msg);
-        
+        void set_name(char* name) {this->name = name;}
 };
+
+void* Read(void* args);
+
+void SendMessage(char *dest, mq_message* msg);
+
 
 #endif
