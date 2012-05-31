@@ -98,6 +98,11 @@ void IntersectionController::ns_clear()
 
 void IntersectionController::ns_tram_g()
 {
+    if (
+       //loop condition
+       this->getFlag(COMMAND_MODE) && this->getFlag(CMD_TRAM)
+       )
+        this->transitionToState(NS_TRAM_G, T_TRAM_G);
     this->transitionToState(NS_TRAM_F, T_TRAM_F);
 
 }
@@ -133,6 +138,12 @@ void IntersectionController::ns_straight()
 void IntersectionController::ns_straight_g_ped_g()
 {
     if (
+       //loop
+       this->getFlag(COMMAND_MODE) && this->getFlag(CMD_NS_PED)
+       )
+        this->transitionToState(NS_STRAIGHT_G_PED_G, T_NS_STRAIGHT_CHECK);
+
+    else if (
        //NS_STRAIGHT_G_PED_F guards
        this->getFlag(SENSOR_MODE) ||
        this->getFlag(TIMER_MODE)
@@ -196,6 +207,12 @@ void IntersectionController::ew_clear()
 void IntersectionController::ew_both_right_g()
 {
     if (
+       //loop
+       this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_RIGHT)
+       )
+        this->transitionToState(EW_BOTH_RIGHT_G, T_EW_BOTH_RIGHT_G);
+
+    else if (
        //EW_BOTH_RIGHT_F guards
        this->getFlag(SENSOR_MODE) ||
        this->getFlag(TIMER_MODE)
@@ -234,6 +251,12 @@ void IntersectionController::ew_straight()
 void IntersectionController::ew_straight_g_ped_g()
 {
     if (
+       //loop
+       this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_PED)
+       )
+        this->transitionToState(EW_STRAIGHT_G_PED_G, T_EW_PED_G);
+
+    else if (
        //EW_STRAIGHT_G_PED_F guards
        this->getFlag(SENSOR_MODE) ||
        this->getFlag(TIMER_MODE)
@@ -255,6 +278,12 @@ void IntersectionController::ew_straight_g_ped_f()
 void IntersectionController::ew_straight_g()
 {
     if (
+       //loop
+       this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_STRAIGHT)
+       )
+        this->transitionToState(EW_STRAIGHT_G, T_EW_STRAIGHT_G_QUICK);
+
+    else if (
        //EW_STRAIGHT_F guards
        this->getFlag(TIMER_MODE) ||
        (this->getFlag(SENSOR_MODE) && this->getFlag(SEN_NS_STRAIGHT)) ||
@@ -341,25 +370,30 @@ void IntersectionController::display()
    flags[SEN_EW_RIGHT] ? ew_t = 'X' : ew_t = ' ';
    flags[SEN_EW_PED] ? ew_p = 'X' : ew_p = ' ';
 
-   printf("        %c %c %c        \n", ns, ns_t, ns_p);
-   printf("        - - -        \n");
-   printf("       |%c|%c|%c|       \n", ns_g, ns_t_w, ns_p_g);
-   printf("       |%c|%c|%c|       \n", ns_a, ns_t_a, ns_p_r);
-   printf("       |%c|- -        \n", ns_r);
-   printf("        -            \n");
-   printf("  --             --  \n");
-   printf("%c|%c%c|          |%c%c%c|%c\n", ew_p, ew_p_g, ew_p_r, ew_r, ew_a, ew_g, ew);
-   printf("  --             --  \n");
-   printf("%c|%c%c|           |%c%c|%c\n", ew_t, ew_t_a, ew_t_g, ew_t_g, ew_t_a, ew_t);
-   printf("  ---           ---  \n");
-   printf("%c|%c%c%c|          |%c%c|%c\n", ew, ew_g, ew_a, ew_r, ew_p_r, ew_p_g, ew_p);
-   printf("  ---           ---  \n");
-   printf("            -        \n");
-   printf("        - -|%c|       \n", ns_r);
-   printf("       |%c|%c|%c|       \n", ns_p_r, ns_t_a, ns_a);
-   printf("       |%c|%c|%c|       \n", ns_p_g, ns_t_w, ns_g);
-   printf("        - - -        \n");
-   printf("        %c %c %c        \n", ns_p, ns_t, ns);
+   printf(" ----------------------- \n");
+   printf("|       | %c %c %c |       |\n", ns, ns_t, ns_p);
+   printf("|       | - - - |       |\n");
+   printf("|       ||%c|%c|%c||       |\n", ns_g, ns_t_w, ns_p_g);
+   printf("|       ||%c|%c|%c||       |\n", ns_a, ns_t_a, ns_p_r);
+   printf("|       ||%c|- - |       |\n", ns_r);
+   printf("|       | -     |       |\n");
+   printf("|-----------------------|\n");
+   printf("|  --   |       |  ---  |\n");
+   printf("|%c|%c%c|  |       | |%c%c%c|%c|\n", ew_p, ew_p_g, ew_p_r, ew_r, ew_a, ew_g, ew);
+   printf("|  --   |       |  ---  |\n");
+   printf("|%c|%c%c|  |       |  |%c%c|%c|\n", ew_t, ew_t_a, ew_t_g, ew_t_g, ew_t_a, ew_t);
+   printf("|  ---  |       |   --  |\n");
+   printf("|%c|%c%c%c| |       |  |%c%c|%c|\n", ew, ew_g, ew_a, ew_r, ew_p_r, ew_p_g, ew_p);
+   printf("|  ---  |       |   --  |\n");
+   printf("|-----------------------|\n");
+   printf("|       |     - |       |\n");
+   printf("|       | - -|%c||       |\n", ns_r);
+   printf("|       ||%c|%c|%c||       |\n", ns_p_r, ns_t_a, ns_a);
+   printf("|       ||%c|%c|%c||       |\n", ns_p_g, ns_t_w, ns_g);
+   printf("|       | - - - |       |\n");
+   printf("|       | %c %c %c |       |\n", ns_p, ns_t, ns);
+   printf(" ----------------------- \n");
+   printf("\n");
 }
 
 
@@ -395,14 +429,14 @@ void IntersectionController::clearFlags(int bitString)
         if (1 & (bitString >> i))
         {
             this->clearFlag(i);
-            std::cout << "Clearing " << controllerFlagNames[i] << 
+            std::cerr << "Clearing " << controllerFlagNames[i] << 
                          " (" << i << ")\n";
         }
 }
 
 void IntersectionController::initialiseStates() 
 {
-    std::cout << "initialiseStates\n";
+    std::cerr << "initialiseStates\n";
 
     //clear all flags 
     this->clearFlags(0xFFFF);

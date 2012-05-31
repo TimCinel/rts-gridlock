@@ -6,12 +6,12 @@ void AbstractController::tick()
 {
     while (1)
     {
-        while (waynesConstant);
+        while (!waynesConstant);
         std::cerr << "consumerdown...";
         pthread_mutex_lock(&mutex);
 
         this->time--;
-        std::cout << "Time: " << this->time << "\n";
+        std::cerr << "Time: " << this->time << "\n";
         this->trigger();
 
         std::cerr << "consumerup!";
@@ -65,6 +65,11 @@ void AbstractController::endClock()
     pthread_join(timer, &result);
 
     //do something with result?
+}
+
+pthread_mutex_t* AbstractController::getMutex()
+{
+    return &mutex;
 }
 
 int AbstractController::getWaynesConstant()

@@ -15,8 +15,6 @@ Queue::Queue(char* name, AbstractController* controller)
     attr.mq_flags = 0;
 
     //create the thread
-    mutex = PTHREAD_MUTEX_INITIALIZER;
-    simonsConstant = 0;
     pthread_create (&t_thread, NULL, read_queue, this);
     std::cerr << "Opened queue " << name << "\n";
 }
@@ -36,7 +34,7 @@ struct mq_attr* Queue::getAttr()
     return &attr;
 }
 
-void set_name(char* name)
+void Queue::set_name(char* name)
 {
     this->name = name;
 }

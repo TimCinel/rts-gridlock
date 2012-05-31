@@ -18,8 +18,8 @@ class AbstractController
         virtual int getFlag(unsigned int flag) = 0;
 
         void tick();
-        inline void resetTimer(int time);
-        inline int getTime();
+        void resetTimer(int time);
+        int getTime();
 
         void initClock();
         void endClock();

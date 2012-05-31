@@ -367,7 +367,7 @@ class IntersectionController : public AbstractController
         unsigned int type;
 
         //queues
-        Queue *inQueue, *outQueue;
+        Queue *inQueue;
 
     private:
         virtual void transitionToState(ControllerInfo::controllerState state, int time);
