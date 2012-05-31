@@ -3,14 +3,12 @@
 using namespace RemoteInfo;
 using namespace ControllerInfo;
 
-RemoteController::RemoteController(const std::string &machineName, char sensorChar) 
+RemoteController::RemoteController(const std::string &machineName) 
 {
     this->machineName = machineName.c_str();
 
     this->incoming = NULL;
     this->incoming = new Queue((char *)this->machineName, this);
-
-    this->createSensors();
 
 }
 
@@ -21,6 +19,8 @@ RemoteController::~RemoteController()
 }
 
 void RemoteController::trigger() {
+    char *machineName = (char *)this->machineName;
+    char *nullString = (char *)"";
     
     if (NOTIFY_AND_LISTEN == this->state) {
         //set a flag so the mode will be sent on next trigger
@@ -30,20 +30,25 @@ void RemoteController::trigger() {
         this->state = LISTEN_ONLY;
     }
 
-    for (int i = ControllerInfo::CONTROLLER_COMMAND_SENTINEL; 
-             i < ControllerInfo::CONTROLLER_MODE_SENTINEL; i++)
-    {
-        if (getFlag(i)) 
-        {
-            write_queue(
-                        (char *)this->machineName, 
-                        ControllerInfo::SET_CONTROLLER_FLAG, 
-                        (char *)"", 
-                        i
-                    );
+    //TODO: Semaphore down
+    
+    //copy flags they arent' held for long
+    int flagsToSet = this->flagsToSet;
+    int flagsToClear = this->flagsToClear;
 
-            this->clearFlag(i);
-        }
+    //reset flags
+    this->flagsToSet = 0;
+    this->flagsToClear = 0;
+
+    //TODO: Semaphore up
+    
+    //rotate through send messages to set and clear flags 
+    for (int i = 0; i < CONTROLLER_MODE_SENTINEL; i++)
+    {
+        if (1 & (flagsToSet >> i)) 
+            write_queue(machineName, SET_CONTROLLER_FLAG, nullString, i);
+        if (1 & (flagsToClear >> i)) 
+            write_queue(machineName, CLEAR_CONTROLLER_FLAG, nullString, i);
     }
 }
 
@@ -51,40 +56,50 @@ void RemoteController::receiveMessage(char *sender, int header, int msg)
 {
     if (NOTIFY_STATE == header)
     {
-        //intersection has changed state
-
-        std::cout << this->machineName << ": " << 
+        //remote intersection has sent its state
+        std::cout << this->machineName << " state: " << 
                       controllerStateNames[msg % CONTROLLER_STATE_SENTINAL]  <<
                       "\n";
+        this->remoteState = (controllerState)msg;
 
-        this->currentState = (controllerState)msg;
+    }
+    else if (NOTIFY_FLAGS == header) 
+    {
+        //remote intersection has sent its flags
+        std::cout << this->machineName << " flags: " << msg << "\n";
+        this->remoteFlags = msg;
+
     }
     else if (REQUEST_MODE == header)
     {
         //on next tick, notify 
-
-        this->state = NOTIFY_AND_LISTEN;
+        this->setFlag(this->mode);
     }
 }
 
 void RemoteController::clearFlag(unsigned int flag)
 {
-    //TODO: Semaphore
-    this->commandsToSend &= ~(1 << flag);
+    //TODO: Semaphore down
+    //NOTE: this SETS the bit in flagsToClear
+    this->flagsToClear &= (1 << flag);
+    //TODO: Semaphore up
+
+    std::cout << "The flag `" << controllerFlagNames[flag] << "` has been cleared\n";
 }
 
 void RemoteController::setFlag(unsigned int flag)
 {
-    //TODO: Semaphore
-    this->commandsToSend &= (1 << flag);
+    //TODO: Semaphore down
+    //sets bit in flagsToSet
+    this->flagsToSet &= (1 << flag);
+    //TODO: Semaphore up
 
-    std::cout << "The flag `" << controllerStateNames[flag] << "` has been set\n";
+    std::cout << "The flag `" << controllerFlagNames[flag] << "` has been set\n";
 
-    //the user has set a new mode
-    if (flag > CONTROLLER_FLAG_SENTINEL &&
-        flag < CONTROLLER_MODE_SENTINEL)
+    //the flag being set is a mode-setting one, update 'mode' accordingly
+    if (flag > CONTROLLER_FLAG_SENTINEL && flag < CONTROLLER_MODE_SENTINEL)
     {
-        std::cout << "The mode has been changed to " << controllerStateNames[flag] << "\n";
+        std::cout << "The mode has been changed to " << controllerFlagNames[flag] << "\n";
         this->mode = flag;
     }
 
@@ -92,23 +107,6 @@ void RemoteController::setFlag(unsigned int flag)
 
 int RemoteController::getFlag(unsigned int flag)
 {
-    //TODO: Semaphore
-    return 1 & (this->commandsToSend >> flag);
-}
-
-void RemoteController::createSensors()
-{
-
-    for (int i = CONTROLLER_MODE_SENTINEL - 1; 
-             i > CONTROLLER_COMMAND_SENTINEL; 
-             i--) 
-    {
-        if (i == CONTROLLER_FLAG_SENTINEL)
-            continue;
-
-        std::cout << "Press " << (char)this->sensorChar++ << " for " <<
-                     controllerFlagNames[i] << "\n";
-
-        this->sensors.push_back(new Sensor(this, this->sensorChar, i));
-    }
+    //doesn't do anything
+    return 0;
 }
