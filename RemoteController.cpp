@@ -3,11 +3,14 @@
 using namespace RemoteInfo;
 using namespace ControllerInfo;
 
-RemoteController::RemoteController(const std::string &centralName, 
-                                   const std::string &intersectionName)
+RemoteController::RemoteController(std::string centralName, 
+                                   std::string intersectionName)
 {
-    this->centralName = centralName.c_str();
-    this->intersectionName = intersectionName.c_str();
+    this->centralName = (char *)(new char[MAX_NAME_LEN]);
+    this->intersectionName = (char *)(new char[MAX_NAME_LEN]);
+
+    strncpy(this->centralName, centralName.c_str(), MAX_NAME_LEN);
+    strncpy(this->intersectionName, intersectionName.c_str(), MAX_NAME_LEN);
 
     //create a Queue and receive messages from the intersection
     this->incoming = NULL;

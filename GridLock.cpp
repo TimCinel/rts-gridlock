@@ -26,18 +26,28 @@ int main(int argc, char **argv) {
     {
 
         //create monitors to monitor intersection instances
-        remotes.push_back(new RemoteController(string(centralName) + "1", string(intersectionName) + "1"));
-        //remotes.push_back(new RemoteController(string(centralName) + "2", string(intersectionName) + "2"));
-        //remotes.push_back(new RemoteController(string(centralName) + "3", string(intersectionName) + "3"));
+        string centralPrefix = string(centralName);
+        string intersectionPrefix = string(intersectionName);
 
+        remotes.push_back(new RemoteController(centralPrefix + "2", intersectionPrefix + "2"));
+        remotes.push_back(new RemoteController(centralPrefix + "3", intersectionPrefix + "3"));
+        remotes.push_back(new RemoteController(centralPrefix + "1", intersectionPrefix + "1"));
+
+
+        std::cout << "#1: " << remotes[0]->getIntersectionName() << "\n";
+        std::cout << "#1: " << remotes[1]->getIntersectionName() << "\n";
+        std::cout << "#3: " << remotes[2]->getIntersectionName() << "\n";
 
         for (unsigned int i = 0; i < remotes.size(); i++)
         {
             //create a thread for each remote
+            std::cout << "Creating thread for " << remotes[i]->getIntersectionName() << "\n";
+
             if (pthread_create(&thread, NULL, remoteRunner, remotes[i]) != 0)
             {
                 //thread's resources will be released as soon as it closes
                 pthread_detach(thread);
+                std::cout << "Detaching " << remotes[i]->getIntersectionName() << "\n";
             }
         }
 
@@ -252,6 +262,7 @@ void GridLock::changeSequence(RemoteController *remote)
 void *GridLock::remoteRunner(void *args) {
     RemoteController *remote = (RemoteController *)args;
 
+    std::cout << "new runner thread for " << remote->getIntersectionName() << "\n";
     while (true) {
         sleep(1);
         remote->trigger();

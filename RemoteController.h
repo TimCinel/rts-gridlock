@@ -21,6 +21,8 @@ namespace RemoteInfo {
         NOTIFY_LIGHTS_EW
     } remoteHeader;
 
+    static const int MAX_NAME_LEN = 128;
+
 }
 
 class RemoteController : public AbstractController
@@ -37,8 +39,8 @@ private:
     //QUEUE RELATED
         
     //path to message queue for IntersectionController
-    const char *centralName;
-    const char *intersectionName;
+    char *centralName;
+    char *intersectionName;
     Queue *incoming;
 
 
@@ -55,8 +57,8 @@ private:
     int remoteFlags, remoteLightsNS, remoteLightsEW;
 
 public:
-    RemoteController(const std::string &centralName, 
-                     const std::string &intersectionName);
+    RemoteController(std::string centralName, 
+                     std::string intersectionName);
     ~RemoteController();
 
     //AbstractController methods
@@ -71,8 +73,8 @@ public:
 
     virtual void display();
 
-    inline const char *getCentralName() { return this->centralName; }
-    inline const char *getIntersectionName() { return this->intersectionName; }
+    inline char *getCentralName() { return this->centralName; }
+    inline char *getIntersectionName() { return this->intersectionName; }
 };
 
 #endif
