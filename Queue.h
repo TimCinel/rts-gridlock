@@ -47,22 +47,13 @@ class Queue
         pthread_mutex_t mutex;
         char*     name;
         AbstractController* controller;
-<<<<<<< Updated upstream
         unsigned int simonsConstant;
         struct mq_attr attr;
-=======
-
-        //struct mq_attr attr;
->>>>>>> Stashed changes
 
     public:
         /* Constructor:
          * "name" is the name of the local mqueue (i1, i2, i3, central) */
-<<<<<<< Updated upstream
         Queue(char*, AbstractController*);
-=======
-        Queue(char*, AbstractController*, unsigned int);
->>>>>>> Stashed changes
         
         ~Queue();
 
@@ -71,10 +62,6 @@ class Queue
 
         void set_name(char* name) {this->name = name;}
         AbstractController* getController() {return controller;}
-<<<<<<< Updated upstream
-=======
-};
->>>>>>> Stashed changes
 
         void downMutex();
         void upMutex();
