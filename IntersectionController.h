@@ -5,7 +5,6 @@
 #include "LightHandler.h"
 #include "Queue.h"
 
-#include <vector>
 #include <cstdio>
 #include <iostream>
 
@@ -334,7 +333,9 @@ class IntersectionController : public AbstractController
 {
     public:
         //constructor
-        IntersectionController(unsigned int, char*);
+        IntersectionController(unsigned int type, 
+                               const std::string &centralName,
+                               const std::string &intersectionName);
 
         //overriding abstract methods
         virtual void trigger();
@@ -356,8 +357,8 @@ class IntersectionController : public AbstractController
             [ControllerInfo::CONTROLLER_STATE_SENTINAL])();
 
         //storage for lights
-        std::vector<LightHandler *> lightsNS;
-        std::vector<LightHandler *> lightsEW;
+        LightHandler *lightsNS;
+        LightHandler *lightsEW;
 
         //storage for light and flash configurations for each state
         Light::lightString lightFlagsNS[ControllerInfo::CONTROLLER_STATE_SENTINAL];
@@ -374,6 +375,8 @@ class IntersectionController : public AbstractController
 
         //queues
         Queue *inQueue;
+        const char *intersectionName;
+        const char *centralName;
 
     private:
         virtual void transitionToState(ControllerInfo::controllerState state, int time);

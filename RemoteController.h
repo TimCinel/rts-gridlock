@@ -12,16 +12,13 @@
 #include <cstdlib>
 
 namespace RemoteInfo {
-    typedef enum {
-        LISTEN_ONLY,
-        NOTIFY_AND_LISTEN,
-        REMOTE_STATE_SENTINEL
-    } remoteState;
 
     typedef enum {
+        REQUEST_MODE,
         NOTIFY_STATE,
         NOTIFY_FLAGS,
-        REQUEST_MODE
+        NOTIFY_LIGHTS_NS,
+        NOTIFY_LIGHTS_EW
     } remoteHeader;
 
 }
@@ -31,18 +28,17 @@ class RemoteController : public AbstractController
 private:
     //MISC
         
-    //the state that the RemoteController is currently in
-    RemoteInfo::remoteState state; 
-        
-    //a bitstring of commands to send on the next trigger()
-    //ControllerInfo::controllerFlag
-    unsigned int commandsToSend;
+    //bitstrings of commands to set/clear on the next trigger()
+    //bit positions represetn values of ControllerInfo::controllerFlag
+    unsigned int flagsToSet;
+    unsigned int flagsToClear;
         
         
     //QUEUE RELATED
         
     //path to message queue for IntersectionController
-    const char *machineName;
+    const char *centralName;
+    const char *intersectionName;
     Queue *incoming;
 
 
@@ -55,11 +51,12 @@ private:
     //the state that the intersection last reported
     ControllerInfo::controllerState remoteState;
 
-    //the flags that thae intersection last reported
-    int remoteFlags;
+    //the flags and lights that thae intersection last reported
+    int remoteFlags, remoteLightsNS, remoteLightsEW;
 
 public:
-    RemoteController(const std::string &machineName);
+    RemoteController(const std::string &centralName, 
+                     const std::string &intersectionName);
     ~RemoteController();
 
     //AbstractController methods
@@ -71,6 +68,8 @@ public:
     virtual void clearFlag(unsigned int flag);
     virtual void setFlag(unsigned int flag);
     virtual int getFlag(unsigned int flag);
+
+    virtual void display();
 
 private:
     void createSensors();

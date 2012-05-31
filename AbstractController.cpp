@@ -1,7 +1,5 @@
 #include "AbstractController.h"
 
-#include <iostream>
-
 void AbstractController::tick()
 {
     while (1)

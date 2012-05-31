@@ -28,6 +28,9 @@ namespace GridLock {
     void *sensorListener(void *args);
     void *remoteRunner(void *args);
 
+    const char *centralName;
+    const char *intersectionName;
+
     static const int LINE_SIZE = 32;
 
     //quit flag

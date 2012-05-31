@@ -8,14 +8,15 @@ using namespace GridLock;
 
 int main(int argc, char **argv) {
 
-    if (argc != 3)
+    if (argc != 4)
     {
         std::cout << "Invalid arguments\n";
         exit(-1);
     }
 
     char *type = argv[1];
-    char *name = argv[2];
+    centralName = argv[2];
+    intersectionName = argv[3];
 
 
     //used when creating RemoteController and IntersectionController
@@ -25,9 +26,9 @@ int main(int argc, char **argv) {
     {
 
         //create monitors to monitor intersection instances
-        remotes.push_back(new RemoteController(string(string(name) + "1")));
-        remotes.push_back(new RemoteController(string(string(name) + "2")));
-        remotes.push_back(new RemoteController(string(string(name) + "3")));
+        remotes.push_back(new RemoteController(string(centralName) + "1", string(intersectionName) + "1"));
+        //remotes.push_back(new RemoteController(string(string(name) + "2")));
+        //remotes.push_back(new RemoteController(string(string(name) + "3")));
 
 
         for (unsigned int i = 0; i < remotes.size(); i++)
@@ -58,13 +59,24 @@ int main(int argc, char **argv) {
         int tram = ('t' == type[strlen("intersection")] ? TRAM : NOTRAM);
 
         //create the IntersectionController
-        AbstractController *controller = new IntersectionController(tram, name);
+        AbstractController *controller = 
+            new IntersectionController(tram, 
+                                       string(centralName), 
+                                       string(intersectionName)
+                                      );
 
         //set up sensors
         sensors.push_back(new Sensor(controller, '1', TIMER_MODE));
         sensors.push_back(new Sensor(controller, '2', SENSOR_MODE));
         sensors.push_back(new Sensor(controller, '3', COMMAND_MODE));
 
+        sensors.push_back(new Sensor(controller, 'q', SEN_NS_PED));
+        sensors.push_back(new Sensor(controller, 'w', SEN_NS_STRAIGHT));
+        sensors.push_back(new Sensor(controller, 'e', SEN_TRAM));
+
+        sensors.push_back(new Sensor(controller, 'a', SEN_EW_PED));
+        sensors.push_back(new Sensor(controller, 's', SEN_EW_STRAIGHT));
+        sensors.push_back(new Sensor(controller, 'd', SEN_EW_RIGHT));
 
         //create a thread to listen to STDIN for Sensors
         pthread_create(&thread, NULL, sensorListener, NULL);
@@ -75,7 +87,7 @@ int main(int argc, char **argv) {
         //start up the controller (will block)
         controller->tick();
 
-        delete(controller);
+        //delete(controller);
 
         quit = 1;
         while (!sensors.empty())
@@ -180,23 +192,26 @@ void *GridLock::remoteRunner(void *args) {
 void *GridLock::sensorListener(void *args) {
 
     char buff;
-    int i;
+    unsigned int i;
 
     while (read(STDIN_FILENO, &buff, 1) > 0 && !quit) {
         for (i = 0; i < sensors.size(); i++) {
             if (write(sensors[i]->getWriteFD(), &buff, 1) != 1)
             {
+                //there was a problem writing out to a pipe
                 cout << "Failed to write to pipe, exiting." << "\n";
                 break;
             }
         }
 
         if (i < sensors.size())
-            //
+            //break must have been called
             break;
     }
 
     //clean up writeFDs
     for (i = 0; i < sensors.size(); i++)
         close(sensors[i]->getWriteFD());
+
+    return NULL;
 }

@@ -3,12 +3,15 @@
 using namespace RemoteInfo;
 using namespace ControllerInfo;
 
-RemoteController::RemoteController(const std::string &machineName) 
+RemoteController::RemoteController(const std::string &centralName, 
+                                   const std::string &intersectionName)
 {
-    this->machineName = machineName.c_str();
+    this->centralName = centralName.c_str();
+    this->intersectionName = intersectionName.c_str();
 
+    //create a Queue and receive messages from the intersection
     this->incoming = NULL;
-    this->incoming = new Queue((char *)this->machineName, this);
+    this->incoming = new Queue((char *)this->centralName, this);
 
 }
 
@@ -19,17 +22,9 @@ RemoteController::~RemoteController()
 }
 
 void RemoteController::trigger() {
-    char *machineName = (char *)this->machineName;
+    char *dest = (char *)this->intersectionName;
     char *nullString = (char *)"";
     
-    if (NOTIFY_AND_LISTEN == this->state) {
-        //set a flag so the mode will be sent on next trigger
-        this->setFlag(this->mode);
-
-        //just listen next time
-        this->state = LISTEN_ONLY;
-    }
-
     //TODO: Semaphore down
     
     //copy flags they arent' held for long
@@ -46,35 +41,55 @@ void RemoteController::trigger() {
     for (int i = 0; i < CONTROLLER_MODE_SENTINEL; i++)
     {
         if (1 & (flagsToSet >> i)) 
-            write_queue(machineName, SET_CONTROLLER_FLAG, nullString, i);
+            write_queue(dest, SET_CONTROLLER_FLAG, nullString, i);
         if (1 & (flagsToClear >> i)) 
-            write_queue(machineName, CLEAR_CONTROLLER_FLAG, nullString, i);
+            write_queue(dest, CLEAR_CONTROLLER_FLAG, nullString, i);
     }
 }
 
 void RemoteController::receiveMessage(char *sender, int header, int msg)
 {
-    if (NOTIFY_STATE == header)
-    {
-        //remote intersection has sent its state
-        std::cout << this->machineName << " state: " << 
-                      controllerStateNames[msg % CONTROLLER_STATE_SENTINAL]  <<
-                      "\n";
-        this->remoteState = (controllerState)msg;
+    switch (header) {
+        case REQUEST_MODE:
+            //intersection has requested that the current mode is sent to it
+
+            this->setFlag(this->mode);
+
+            break;
+
+        case NOTIFY_STATE:
+            //remote intersection has sent its state
+
+            std::cout << this->intersectionName << " state: " << 
+                          controllerStateNames[msg % CONTROLLER_STATE_SENTINAL]  
+                          << "\n";
+            this->remoteState = (controllerState)msg;
+
+            break;
+
+        case NOTIFY_FLAGS:
+            //remote intersection has sent its flags
+
+            std::cout << this->intersectionName << " flags: " << msg << "\n";
+            this->remoteFlags = msg;
+
+            break;
+
+        case NOTIFY_LIGHTS_NS:
+            //remote intersection has sent its NS lights
+
+            this->remoteLightsNS = msg;
+
+            break;
+        case NOTIFY_LIGHTS_EW:
+            //remote intersection has sent its EW lights
+
+            this->remoteLightsEW = msg;
+
+            break;
 
     }
-    else if (NOTIFY_FLAGS == header) 
-    {
-        //remote intersection has sent its flags
-        std::cout << this->machineName << " flags: " << msg << "\n";
-        this->remoteFlags = msg;
 
-    }
-    else if (REQUEST_MODE == header)
-    {
-        //on next tick, notify 
-        this->setFlag(this->mode);
-    }
 }
 
 void RemoteController::clearFlag(unsigned int flag)
@@ -109,4 +124,10 @@ int RemoteController::getFlag(unsigned int flag)
 {
     //doesn't do anything
     return 0;
+}
+
+void RemoteController::display()
+{
+    //TODO: Implement this
+    std::cout << "IMPLEMENT ME!\n";
 }

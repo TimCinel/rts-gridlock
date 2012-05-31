@@ -2,7 +2,9 @@
 #define ABSTRACTCONTROLLER
 
 #include "AbstractController.h"
+
 #include <pthread.h>
+#include <iostream>
 
 #define SUCCESS 1
 #define FAILURE 0

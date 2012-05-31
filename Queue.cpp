@@ -56,9 +56,9 @@ void* read_queue(void* args)
             
     while (1)
     {
-        if ((qr = mq_open(queue->get_name(), O_RDONLY, S_IRUSR, queue->getAttr())) < 0)
+        if ((qr = mq_open(queue->get_name(), O_CREAT | O_RDONLY, S_IRUSR, queue->getAttr())) < 0)
         {
-            std::cerr << "Could not open Queue "<< queue->get_name() << "\n";
+            std::cerr << "Could not open Queue "<< queue->get_name() << "(read)\n";
             continue;
         }
 
@@ -106,7 +106,7 @@ void write_queue(char *dest, int header, char* sender, int msg)
             std::cerr << "Sent '" << cast_msg << "'i\n";
         mq_close(qs);
     } else {
-        std::cerr << "Unable to open queue " << dest << "\n";
+        std::cerr << "Unable to open queue " << dest << "(write)\n";
     }
 }
 
