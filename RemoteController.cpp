@@ -3,12 +3,12 @@
 using namespace RemoteInfo;
 using namespace ControllerInfo;
 
-RemoteController::RemoteController(char *machineName, char sensorChar) 
+RemoteController::RemoteController(const std::string &machineName, char sensorChar) 
 {
-    this->machineName = machineName;
+    this->machineName = machineName.c_str();
 
     this->incoming = NULL;
-    this->incoming = new Queue(this->machineName, this);
+    this->incoming = new Queue((char *)this->machineName, this);
 
     this->createSensors();
 
@@ -36,7 +36,7 @@ void RemoteController::trigger() {
         if (getFlag(i)) 
         {
             write_queue(
-                        this->machineName, 
+                        (char *)this->machineName, 
                         ControllerInfo::SET_CONTROLLER_FLAG, 
                         (char *)"", 
                         i

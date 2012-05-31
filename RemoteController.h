@@ -7,6 +7,7 @@
 #include "Queue.h"
 
 #include <vector>
+#include <string>
 #include <cstring>
 #include <cstdlib>
 
@@ -24,11 +25,11 @@ namespace RemoteInfo {
 
 }
 
-class RemoteController : AbstractController
+class RemoteController : public AbstractController
 {
 private:
     //queue related
-    char *machineName;
+    const char *machineName;
     Queue *incoming;
     unsigned int commandsToSend;
 
@@ -42,7 +43,7 @@ private:
     ControllerInfo::controllerState currentState;
 
 public:
-    RemoteController(char *machineName, char sensorChar);
+    RemoteController(const std::string &machineName, char sensorChar);
     ~RemoteController();
 
     virtual void trigger();
