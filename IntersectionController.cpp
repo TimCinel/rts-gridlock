@@ -500,7 +500,7 @@ void IntersectionController::initialiseStates()
 
     if (type == TRAM)
     {
-        mapState(NS_TRAM_G, &IntersectionController::ns_tram_g,
+        mapState(NS_TRAM_G, &IntersectionController::ns_straight,
                  NS_TRAM_G_L_NS, NS_TRAM_G_L_EW,
                  NS_TRAM_G_F_NS, NS_TRAM_G_F_EW, 
                  NS_TRAM_G_C_EXIT);
@@ -509,6 +509,19 @@ void IntersectionController::initialiseStates()
                  NS_TRAM_F_L_NS, NS_TRAM_F_L_EW,
                  NS_TRAM_F_F_NS, NS_TRAM_F_F_EW, 
                  NS_TRAM_F_C_EXIT);
+    }
+    else
+    {
+        //map tram to NS_STRAIGHT if this is not a tram intersection
+        mapState(NS_TRAM_G, &IntersectionController::ns_straight,
+                 NS_STRAIGHT_L_NS, NS_STRAIGHT_L_EW,
+                 NS_STRAIGHT_F_NS, NS_STRAIGHT_F_EW, 
+                 NS_STRAIGHT_C_EXIT);
+
+        mapState(NS_TRAM_F, &IntersectionController::ns_straight,
+                 NS_STRAIGHT_L_NS, NS_STRAIGHT_L_EW,
+                 NS_STRAIGHT_F_NS, NS_STRAIGHT_F_EW, 
+                 NS_STRAIGHT_C_EXIT);
     }
 
     mapState(NS_STRAIGHT, &IntersectionController::ns_straight,

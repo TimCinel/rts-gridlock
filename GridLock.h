@@ -16,6 +16,7 @@ namespace GridLock {
     void centralMenu();
 
     void changeMode(RemoteController *remote);
+    int selectCommand();
     void showIntersections();
     void monitorIntersections();
 

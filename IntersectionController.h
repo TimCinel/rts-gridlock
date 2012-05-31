@@ -99,22 +99,22 @@ namespace ControllerInfo
         "SEN_EW_PED",
         "SEN_EW_RIGHT",
         "SEN_NS_STRAIGHT",
-        "SEN_NS_PED," 
-        "SEN_TRAM," 
+        "SEN_NS_PED", 
+        "SEN_TRAM", 
         "CONTROL_SEQUENCE_SENTINEL",
         "SEQ_EW_STRAIGHT",
         "SEQ_EW_PED",
         "SEQ_EW_RIGHT",
         "SEQ_NS_STRAIGHT",
-        "SEQ_NS_PED," 
-        "SEQ_TRAM," 
+        "SEQ_NS_PED", 
+        "SEQ_TRAM",
         "CONTROLLER_COMMAND_SENTINEL",
         "CMD_EW_STRAIGHT",
         "CMD_EW_PED",
         "CMD_EW_RIGHT",
         "CMD_NS_STRAIGHT",
-        "CMD_NS_PED," 
-        "CMD_TRAM," 
+        "CMD_NS_PED", 
+        "CMD_TRAM", 
         "CONTROLLER_FLAG_SENTINEL",
         "COMMAND_MODE",
         "SENSOR_MODE",
@@ -312,7 +312,8 @@ namespace ControllerInfo
     static const int NS_STRAIGHT_C_EXIT         = 0;
     static const int NS_STRAIGHT_G_PED_G_C_EXIT = (1 << SEN_NS_PED);
     static const int NS_STRAIGHT_G_PED_F_C_EXIT = 0;
-    static const int NS_STRAIGHT_G_C_EXIT       = (1 << SEN_NS_STRAIGHT);
+    static const int NS_STRAIGHT_G_C_EXIT       = (1 << SEN_NS_STRAIGHT) |
+                                                  (1 << SEN_NS_PED);
     static const int NS_STRAIGHT_F_C_EXIT       = 0;
     static const int EW_CLEAR_C_EXIT            = 0;
     static const int EW_BOTH_RIGHT_G_C_EXIT     = 0;
@@ -321,7 +322,8 @@ namespace ControllerInfo
     static const int EW_STRAIGHT_G_PED_G_C_EXIT = (1 << SEN_EW_PED);
     static const int EW_STRAIGHT_G_PED_F_C_EXIT = 0;
     static const int EW_STRAIGHT_G_C_EXIT       = (1 << SEN_EW_STRAIGHT) |
-                                                  (1 << SEN_EW_RIGHT);
+                                                  (1 << SEN_EW_RIGHT) |
+                                                  (1 << SEN_EW_PED);
     static const int EW_STRAIGHT_F_C_EXIT       = 0;
 }
 

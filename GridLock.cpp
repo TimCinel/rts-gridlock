@@ -161,7 +161,7 @@ void GridLock::changeMode(RemoteController *remote)
     printf("-----------\n\n");
 
     int option = readInt(1, 3);
-    int mode;
+    int mode, command;
 
     switch (option)
     {
@@ -173,6 +173,17 @@ void GridLock::changeMode(RemoteController *remote)
             break;
         case 3:
             mode = COMMAND_MODE;
+            if ((command = selectCommand()) < 1)
+                //didn't select a command
+                return;
+            else
+                if (NULL != remote)
+                    remote->setFlag(command);
+                else
+                    for (unsigned int i = 0; i < remotes.size(); i++)
+                        remotes[i]->setFlag(command);
+
+
             break;
         default:
             printf("Unrecognised option.\n");
@@ -184,6 +195,29 @@ void GridLock::changeMode(RemoteController *remote)
     else
         for (unsigned int i = 0; i < remotes.size(); i++)
             remotes[i]->setFlag(mode);
+}
+
+int GridLock::selectCommand()
+{
+    static const unsigned int range = CONTROLLER_FLAG_SENTINEL - 
+                                      CONTROLLER_COMMAND_SENTINEL;
+    static const unsigned int offset = CONTROLLER_COMMAND_SENTINEL;
+
+    std::cout << "range: " << range << ", offset: " << offset << "\n";
+
+    printf("\n\n\n");
+    printf("select command\n");
+    printf("--------------\n");
+    for (unsigned int i = 1; i < range; i++)
+        printf("%d. %s\n", i, controllerFlagNames[offset + i]);
+    printf("--------------\n\n");
+    
+    int option = readInt(1, range);
+
+    if (option > 0)
+        return offset + option;
+    else
+        return option;
 }
 
 void GridLock::showIntersections()
