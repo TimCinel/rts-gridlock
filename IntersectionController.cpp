@@ -2,13 +2,16 @@
 
 using namespace ControllerInfo;
 
-IntersectionController::IntersectionController(unsigned int type)
+IntersectionController::IntersectionController(unsigned int typei, char* inq, char* outq)
 {
     std::cout << "Constructor\n";
 
     this->type = type;
 
     this->initialiseStates();
+
+    inQueue = new Queue(inq, this, READ);
+    outQueue = new Queue(outq, thisi, WRITE);
 
     this->initClock();
 
@@ -521,3 +524,4 @@ void IntersectionController::initialiseStates()
     this->transitionToState(STARTUP, T_STARTUP);
 
 }
+

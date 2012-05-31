@@ -25,7 +25,7 @@ test_intersectioncontroller: test/test_IntersectionController.cpp LightHandler.c
 test_intersectionsensor: test/test_IntersectionController.cpp IntersectionController.cpp  LightHandler.cpp Sensor.cpp
 	${CC} ${CCFLAGS} AbstractController.cpp IntersectionController.cpp test/test_IntersectionSensor.cpp LightHandler.cpp Sensor.cpp -o test_intersectionsensor
 
-test_queue: test/test_Queue.cpp test/mock_Controller.h Queue.cpp Queue.h
+test_queue: test/test_Queue.cpp Queue.cpp Queue.h
 	${CC} ${CCFLAGS} ${TESTFLAGS} test/test_Queue.cpp Queue.cpp -o test_queue -lpthread
 
 

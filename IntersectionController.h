@@ -3,6 +3,7 @@
 
 #include "AbstractController.h"
 #include "LightHandler.h"
+#include "Queue.h"
 
 #include <vector>
 #include <cstdio>
@@ -327,7 +328,7 @@ class IntersectionController : public AbstractController
 {
 public:
     //constructor
-    IntersectionController(unsigned int type);
+    IntersectionController(unsigned int, char*, char*);
 
     //overriding abstract methods
     virtual void trigger();
@@ -363,6 +364,9 @@ private:
 
     //type of intersection controller, TRAM for 'i2', NOTRAM for 'i1' or 'i3'
     unsigned int type;
+
+    //queues
+    Queue *inQueue, *outQueue;
 
 private:
     virtual void transitionToState(ControllerInfo::controllerState state, int time);
