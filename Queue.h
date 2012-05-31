@@ -46,11 +46,11 @@ class Queue
         pthread_t  t_thread;
         pthread_mutex_t mutex;
         char*     name;
-        AbstractController* controller;
         unsigned int simonsConstant;
         struct mq_attr attr;
 
     public:
+        AbstractController* controller;
         /* Constructor:
          * "name" is the name of the local mqueue (i1, i2, i3, central) */
         Queue(char*, AbstractController*);

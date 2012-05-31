@@ -3,9 +3,12 @@
 
 #include "AbstractController.h"
 #include "IntersectionController.h"
+#include "Sensor.h"
 #include "Queue.h"
 
 #include <vector>
+#include <cstring>
+#include <cstdlib>
 
 namespace RemoteInfo {
     typedef enum {
@@ -30,12 +33,11 @@ private:
     unsigned int commandsToSend;
 
     //sensor related
-    vector<Sensor *> sensors;
-    int readFD;
+    std::vector<Sensor *> sensors;
     char sensorChar;
 
     //state related
-    remoteState state;
+    RemoteInfo::remoteState state;
     int mode;
     ControllerInfo::controllerState currentState;
 
@@ -43,12 +45,14 @@ public:
     RemoteController(char *machineName, char sensorChar);
     ~RemoteController();
 
-    virtual void trigger() = 0;
+    virtual void trigger();
 
-    virtual void receiveMessage(char *sender, int header, int msg) = 0;
-    virtual void clearFlag(unsigned int flag) = 0;
-    virtual void setFlag(unsigned int flag) = 0;
-    virtual int getFlag(unsigned int flag) = 0;
+    virtual void receiveMessage(char *sender, int header, int msg);
+    virtual void clearFlag(unsigned int flag);
+    virtual void setFlag(unsigned int flag);
+    virtual int getFlag(unsigned int flag);
+
+    std::vector<Sensor *> *getSensors() { return &this->sensors; }
 
 private:
     void createSensors();

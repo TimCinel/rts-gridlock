@@ -2,7 +2,7 @@
 
 using namespace ControllerInfo;
 
-IntersectionController::IntersectionController(unsigned int typei, char* inq, char* outq)
+IntersectionController::IntersectionController(unsigned int type, char* inq)
 {
     std::cout << "Constructor\n";
 
@@ -10,11 +10,18 @@ IntersectionController::IntersectionController(unsigned int typei, char* inq, ch
 
     this->initialiseStates();
 
-    inQueue = new Queue(inq, this, READ);
-    outQueue = new Queue(outq, thisi, WRITE);
+    inQueue = new Queue(inq, this);
 
     this->initClock();
 
+}
+
+void IntersectionController::receiveMessage(char *sender, int header, int msg) {
+    if (header == SET_CONTROLLER_FLAG) {
+        this->setFlag(msg);
+    } else if (header == CLEAR_CONTROLLER_FLAG) {
+        this->clearFlag(msg);
+    }
 }
 
 void IntersectionController::trigger()
@@ -152,6 +159,11 @@ void IntersectionController::ns_straight_g_ped_f()
 
 void IntersectionController::ns_straight_g()
 {
+    if (
+       //NS_STRAIGHT_G guards
+       this->getFlag(COMMAND_MODE) && this->getFlag(CMD_NS_STRAIGHT)
+       )
+        this->transitionToState(NS_STRAIGHT_G, T_NS_STRAIGHT_G_QUICK);
     this->transitionToState(NS_STRAIGHT_F, T_NS_STRAIGHT_F);
 
 }

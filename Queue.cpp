@@ -45,7 +45,7 @@ void* read_queue(void* args)
 
         if ((qr = mq_open(queue->get_name(), O_RDONLY, S_IRUSR, queue->getAttr())) < 0)
         {
-            std::cout << "Could not open Queue "<< queue->get_name() << "\n";
+            //std::cout << "Could not open Queue "<< queue->get_name() << "\n";
             //queue->upMutex();
             continue;
         }
@@ -76,7 +76,7 @@ void* read_queue(void* args)
             //mq_q.push()
         }*/
 
-        queue->controller->receive_message(buf.sender, buf.header, buf.msg);
+        queue->controller->receiveMessage(buf.sender, buf.header, buf.msg);
 
         mq_close(qr);
 

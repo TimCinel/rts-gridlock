@@ -5,7 +5,7 @@
 using namespace ControllerInfo;
 
 int main() {
-    IntersectionController *controller = new IntersectionController(TRAM);
+    IntersectionController *controller = new IntersectionController(TRAM, "wawaw");
 
     //controller->setFlag(COMMAND_MODE);
     //controller->setFlag(CMD_EW_STRAIGHT);

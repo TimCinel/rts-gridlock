@@ -7,14 +7,14 @@ void AbstractController::tick()
     while (1)
     {
         while (!getWaynesConstant());
-        std::cout << "consumerdown...";
+        //std::cout << "consumerdown...";
         downMutex();
 
         this->time--;
         std::cout << "Time: " << this->time << "\n";
         this->trigger();
 
-        std::cout << "consumerup!";
+        //std::cout << "consumerup!";
         upMutex();
         clearWaynesConstant();
     }
@@ -37,10 +37,10 @@ void* runClock(void* ptr)
         sleep(1);
 
         while (controller->getWaynesConstant());
-        std::cout << "producerdown...";
+        //std::cout << "producerdown...";
         controller->downMutex();
 
-        std::cout << "producerup!";
+        //std::cout << "producerup!";
         controller->upMutex();
         controller->setWaynesConstant();
     }

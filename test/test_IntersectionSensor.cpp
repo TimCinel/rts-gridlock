@@ -10,21 +10,22 @@ int tick_fd;
 using namespace ControllerInfo;
 
 
-void *tick_listen(void *args);
+void *listen(void *args);
 
-int main(void) {
+    static const int PIPES = CONTROLLER_MODE_SENTINEL - SYSTEM_MODE;
     int pipe_fds[2];
-    static const int PIPES = CONTROLLER_MODE_SENTINEL - CMD_EW_STRAIGHT + 1;
     int write_fds[PIPES];
 
-    controller = new IntersectionController(TRAM);
+int main(void) {
+
+    controller = new IntersectionController(TRAM, "dick");
 
     int i;
     for (i = 0; i < PIPES; i++) {
 
         if (pipe(pipe_fds) != 0) {
             std::cout << "Failed to create pipe. Bailing!\n";
-            exit(1);
+            return 1;
         }
         write_fds[i] = pipe_fds[1];
 
@@ -38,13 +39,21 @@ int main(void) {
         else 
         {
             tick_fd = pipe_fds[0];
-            pthread_t thread;
-            pthread_create(&thread, NULL, tick_listen, NULL);
         }
-
 
     }
 
+    pthread_t thread;
+    pthread_create(&thread, NULL, listen, NULL);
+
+    controller->tick();
+
+
+}
+
+
+void *listen(void *args)
+{
     char buff;
     while (read(STDIN_FILENO, &buff, 1) > 0) {
         for (int i = 0; i < PIPES; i++)
@@ -52,22 +61,6 @@ int main(void) {
                 std::cout << "Failed to write to pipe. Bailing!\n";
             }
     }
-
-
-
-
-}
-
-
-void *tick_listen(void *args)
-{
-    char buff;
-
-    std::cout << "Enter \".\" to tick.\n";
-
-    while (read(tick_fd, &buff, 1) > 0) 
-        if ('.' == buff) 
-            controller->tick();
 
     return NULL;
 }

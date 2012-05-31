@@ -113,7 +113,7 @@ namespace ControllerInfo
         "CONTROLLER_FLAG_SENTINEL",
         "COMMAND_MODE",
         "SENSOR_MODE",
-        "TIMER_MODE"
+        "TIMER_MODE" ,
         "CONTROLLER_MODE_SENTINEL"
     };
 
@@ -328,11 +328,12 @@ class IntersectionController : public AbstractController
 {
 public:
     //constructor
-    IntersectionController(unsigned int, char*, char*);
+    IntersectionController(unsigned int, char*);
 
     //overriding abstract methods
     virtual void trigger();
 
+    virtual void receiveMessage(char *sender, int header, int msg);
     virtual void clearFlag(unsigned int flag);
     virtual void setFlag(unsigned int flag);
     virtual int getFlag(unsigned int flag);
