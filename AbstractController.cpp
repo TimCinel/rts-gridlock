@@ -6,18 +6,30 @@ void AbstractController::tick()
 {
     while (1)
     {
-        while (!getWaynesConstant());
-        //std::cout << "consumerdown...";
-        downMutex();
+        while (!waynesConstant);
+        std::cerr << "consumerdown...";
+        pthread_mutex_lock(&mutex);
 
         this->time--;
-        std::cout << "Time: " << this->time << "\n";
+        std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n";
         this->trigger();
+        display();
+        std::cout << "Time: " << this->time << "\n";
 
-        //std::cout << "consumerup!";
-        upMutex();
-        clearWaynesConstant();
+        std::cerr << "consumerup!";
+        pthread_mutex_unlock(&mutex);
+        waynesConstant = 0;
     }
+}
+
+void AbstractController::resetTimer(int time)
+{
+    this->time = time;
+}
+
+int AbstractController::getTime()
+{
+    return this->time;
 }
 
 void AbstractController::initClock()
@@ -37,12 +49,12 @@ void* runClock(void* ptr)
         sleep(1);
 
         while (controller->getWaynesConstant());
-        //std::cout << "producerdown...";
-        controller->downMutex();
+        std::cerr << "producerdown...";
+        pthread_mutex_lock(controller->getMutex());
 
-        //std::cout << "producerup!";
-        controller->upMutex();
-        controller->setWaynesConstant();
+        std::cerr << "producerup!";
+        pthread_mutex_unlock(controller->getMutex());
+        controller->setWaynesConstant(1);
     }
 
     return 0;
@@ -57,14 +69,9 @@ void AbstractController::endClock()
     //do something with result?
 }
 
-void AbstractController::downMutex()
+pthread_mutex_t* AbstractController::getMutex()
 {
-    pthread_mutex_lock(&mutex);
-}
-
-void AbstractController::upMutex()
-{
-    pthread_mutex_unlock(&mutex);
+    return &mutex;
 }
 
 int AbstractController::getWaynesConstant()
@@ -72,18 +79,8 @@ int AbstractController::getWaynesConstant()
     return waynesConstant;
 }
 
-void AbstractController::setWaynesConstant()
+void AbstractController::setWaynesConstant(int n)
 {
-    waynesConstant = 1;
-}
-
-void AbstractController::clearWaynesConstant()
-{
-    waynesConstant = 0;
-}
-
-void AbstractController::toggleWaynesConstant()
-{
-    waynesConstant = !waynesConstant;
+    waynesConstant = n;
 }
 

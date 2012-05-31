@@ -332,80 +332,79 @@ namespace ControllerInfo
 
 class IntersectionController : public AbstractController
 {
-public:
-    //constructor
-    IntersectionController(unsigned int, char*);
+    public:
+        //constructor
+        IntersectionController(unsigned int, char*);
 
-    //overriding abstract methods
-    virtual void trigger();
+        //overriding abstract methods
+        virtual void trigger();
 
-    virtual void receiveMessage(char *sender, int header, int msg);
-    virtual void clearFlag(unsigned int flag);
-    virtual void setFlag(unsigned int flag);
-    virtual int getFlag(unsigned int flag);
+        virtual void receiveMessage(char *sender, int header, int msg);
+        virtual void clearFlag(unsigned int flag);
+        virtual void setFlag(unsigned int flag);
+        virtual int getFlag(unsigned int flag);
 
-    void display();
+        void display();
 
-private:
-    //instance variables
-    ControllerInfo::controllerState state;
-    unsigned int flags[ControllerInfo::CONTROLLER_FLAG_SENTINEL];
+    private:
+        //instance variables
+        ControllerInfo::controllerState state;
+        unsigned int flags[ControllerInfo::CONTROLLER_FLAG_SENTINEL];
 
-    //a CONTROLLER_STATE_SENTINAL-element array of function pointers
-    void (IntersectionController::*stateRecord
+        //a CONTROLLER_STATE_SENTINAL-element array of function pointers
+        void (IntersectionController::*stateRecord
             [ControllerInfo::CONTROLLER_STATE_SENTINAL])();
 
-    //storage for lights
-    std::vector<LightHandler *> lightsNS;
-    std::vector<LightHandler *> lightsEW;
+        //storage for lights
+        std::vector<LightHandler *> lightsNS;
+        std::vector<LightHandler *> lightsEW;
 
-    //storage for light and flash configurations for each state
-    Light::lightString lightFlagsNS[ControllerInfo::CONTROLLER_STATE_SENTINAL];
-    Light::lightString lightFlagsEW[ControllerInfo::CONTROLLER_STATE_SENTINAL];
+        //storage for light and flash configurations for each state
+        Light::lightString lightFlagsNS[ControllerInfo::CONTROLLER_STATE_SENTINAL];
+        Light::lightString lightFlagsEW[ControllerInfo::CONTROLLER_STATE_SENTINAL];
 
-    Light::lightString flashFlagsNS[ControllerInfo::CONTROLLER_STATE_SENTINAL];
-    Light::lightString flashFlagsEW[ControllerInfo::CONTROLLER_STATE_SENTINAL];
+        Light::lightString flashFlagsNS[ControllerInfo::CONTROLLER_STATE_SENTINAL];
+        Light::lightString flashFlagsEW[ControllerInfo::CONTROLLER_STATE_SENTINAL];
 
-    //a map of bitStrings indicating which states to clear when exiting a state
-    int exitClearFlags[ControllerInfo::CONTROLLER_STATE_SENTINAL];
+        //a map of bitStrings indicating which states to clear when exiting a state
+        int exitClearFlags[ControllerInfo::CONTROLLER_STATE_SENTINAL];
 
-    //type of intersection controller, TRAM for 'i2', NOTRAM for 'i1' or 'i3'
-    unsigned int type;
+        //type of intersection controller, TRAM for 'i2', NOTRAM for 'i1' or 'i3'
+        unsigned int type;
 
-    //queues
-    Queue *inQueue, *outQueue;
+        //queues
+        Queue *inQueue;
 
-private:
-    virtual void transitionToState(ControllerInfo::controllerState state, int time);
-    virtual void clearFlags(int bitString);
-    virtual void initialiseStates();
+    private:
+        virtual void transitionToState(ControllerInfo::controllerState state, int time);
+        virtual void clearFlags(int bitString);
+        virtual void initialiseStates();
 
-    void mapState(ControllerInfo::controllerState state,
-                  void (IntersectionController::*stateRecord)(), 
-                  Light::lightString lightFlagsNS, Light::lightString lightFlagsEW,
-                  Light::lightString flashFlagsNS, Light::lightString flashFlagsEW,
-                  int clearFlags
-                 );
+        void mapState(ControllerInfo::controllerState state,
+                      void (IntersectionController::*stateRecord)(), 
+                      Light::lightString lightFlagsNS, Light::lightString lightFlagsEW,
+                      Light::lightString flashFlagsNS, Light::lightString flashFlagsEW,
+                      int clearFlags
+                     );
 
-    //private state functions
-    virtual void startup();
-    virtual void ns_clear();
-    virtual void ns_tram_g();
-    virtual void ns_tram_f();
-    virtual void ns_straight();
-    virtual void ns_straight_g_ped_g();
-    virtual void ns_straight_g_ped_f();
-    virtual void ns_straight_g();
-    virtual void ns_straight_f();
-    virtual void ew_clear();
-    virtual void ew_both_right_g();
-    virtual void ew_both_right_f();
-    virtual void ew_straight();
-    virtual void ew_straight_g_ped_g();
-    virtual void ew_straight_g_ped_f();
-    virtual void ew_straight_g();
-    virtual void ew_straight_f();
-
+        //private state functions
+        virtual void startup();
+        virtual void ns_clear();
+        virtual void ns_tram_g();
+        virtual void ns_tram_f();
+        virtual void ns_straight();
+        virtual void ns_straight_g_ped_g();
+        virtual void ns_straight_g_ped_f();
+        virtual void ns_straight_g();
+        virtual void ns_straight_f();
+        virtual void ew_clear();
+        virtual void ew_both_right_g();
+        virtual void ew_both_right_f();
+        virtual void ew_straight();
+        virtual void ew_straight_g_ped_g();
+        virtual void ew_straight_g_ped_f();
+        virtual void ew_straight_g();
+        virtual void ew_straight_f();
 };
 
 #endif

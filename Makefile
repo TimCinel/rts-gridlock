@@ -3,7 +3,7 @@ SRCS		:= $(wildcard *.cpp)
 OBJS		:= ${SRCS:.cpp=.o}
 
 CC     		:= g++
-CCFLAGS		:= -O0 -g -Wall -pedantic
+CCFLAGS		:= -O0 -g -Wall -pedantic -std=c++0x
 LDFLAGS		:= 
 TESTFLAGS	:= -DMOCK_OBJECTS
 
@@ -20,7 +20,7 @@ test_lighthandler: test/test_LightHandler.cpp
 	${CC} ${CCFLAGS} ${TESTFLAGS} test/test_LightHandler.cpp -o test_lighthandler
 
 test_intersectioncontroller: test/test_IntersectionController.cpp LightHandler.cpp Sensor.cpp Queue.cpp
-	${CC} ${CCFLAGS} ${TESTFLAGS} AbstractController.cpp IntersectionController.cpp test/test_IntersectionController.cpp LightHandler.cpp Sensor.cpp Queue.cpp -o test_intersectioncontroller 
+	${CC} ${CCFLAGS} ${TESTFLAGS} AbstractController.cpp IntersectionController.cpp test/test_IntersectionController.cpp LightHandler.cpp Sensor.cpp Queue.cpp -o test_intersectioncontroller
 
 test_intersectionsensor: test/test_IntersectionController.cpp IntersectionController.cpp  LightHandler.cpp Sensor.cpp Queue.cpp
 	${CC} ${CCFLAGS} AbstractController.cpp IntersectionController.cpp test/test_IntersectionSensor.cpp LightHandler.cpp Sensor.cpp Queue.cpp -o test_intersectionsensor
