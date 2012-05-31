@@ -60,7 +60,7 @@ void *sensorListener(vector<intersection> *intersections) {
     while (read(STDIN_FILENO, &buff, 1) > 0) {
         for (int i = 0; i < intersections->size(); i++)
         {
-            vector<Sensor> *sensors = intersections[i]->getSensors();
+            vector<Sensor *> *sensors = intersections[i]->getSensors();
 
             for (int j = 0; j < sensors->size(); j++) {
                 if (write(sensors[j]->getWriteFD(), &buff, 1) != 1)

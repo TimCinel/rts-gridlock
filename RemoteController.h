@@ -1,9 +1,11 @@
-#ifndef INTERSECTIONRECORD_H
-#define INTERSECTIONRECORD_H
+#ifndef REMOTECONTROLLER_H
+#define REMOTECONTROLLER_H
 
 #include "AbstractController.h"
 #include "IntersectionController.h"
 #include "Queue.h"
+
+#include <vector>
 
 namespace RemoteInfo {
     typedef enum {
