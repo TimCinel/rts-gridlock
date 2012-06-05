@@ -2,47 +2,45 @@
 #define SENSOR_H
 
 #ifndef MOCK_OBJECTS
-#include "AbstractController.h"
+    #include "AbstractController.h"
 #else
-#include "test/mock_Controller.h"
+    #include "test/mock_Controller.h"
 #endif
 
 #include <pthread.h>
 
+class Sensor
+{
+    /*instance variables*/
+    private:
+        AbstractController  *target; //controller to set flag on
+        char trigger; //character to detect when input is read
+        int flagPosition; //flag to set when trigger is detected
+        int readFD; //file descriptor to read on
+        int writeFD; //file descriptor to write on
 
-class Sensor {
+        pthread_t *thread;    
+        pthread_attr_t *threadAttr;
 
-private:
-    AbstractController  *target;        //controller to set flag on
-    char                trigger;        //character to detect when input is read
-    int                 flagPosition;   //flag to set when trigger is detected
-    int                 readFD;         //file descriptor to read on
-    int                 writeFD;        //file descriptor to write on
+    /*constructors*/
+    public:
+        Sensor(AbstractController *target, char trigger, int flagPosition, int readFD);
+        Sensor(AbstractController *target, char trigger, int flagPosition);
+        ~Sensor();
 
-    pthread_t           *thread;    
-    pthread_attr_t      *threadAttr;
+    /*member functions*/
+    public:
+        int getReadFD();
+        int getWriteFD();
+        int getTrigger();
 
+        void checkTrigger(char received);
 
-public:
-    Sensor();
-
-    //use this constructor
-    Sensor(AbstractController *target, char trigger, int flagPosition, int readFD);
-    Sensor(AbstractController *target, char trigger, int flagPosition);
-    ~Sensor();
-
-    int getReadFD() {return this->readFD;}
-    int getWriteFD() {return this->writeFD;}
-    int getTrigger() {return this->trigger;}
-
-    void checkTrigger(char received);
-
-private:
-    void createThread();
-
+    private:
+        void createThread();
 };
 
-
+/*non member function for thread*/
 namespace sensor_util {
     void *listen(void *args);
 }

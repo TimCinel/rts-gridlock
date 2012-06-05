@@ -3,11 +3,11 @@
 using namespace std;
 using namespace ControllerInfo;
 
-
 using namespace GridLock;
 
-int main(int argc, char **argv) {
-
+int main(int argc, char **argv)
+{
+    /*test for command line arguments*/
     if (argc != 4)
     {
         std::cout << "Invalid arguments\n";
@@ -18,44 +18,48 @@ int main(int argc, char **argv) {
     centralName = argv[2];
     intersectionName = argv[3];
 
-
-    //used when creating RemoteController and IntersectionController
+    /*used when creating RemoteController and IntersectionController*/
     pthread_t thread;
 
+    /*create central controller*/
     if (strcmp(type, "central") == 0)
     {
-
-        //create monitors to monitor intersection instances
+        /*create monitors to monitor intersection instances*/
         string centralPrefix = string(centralName);
         string intersectionPrefix = string(intersectionName);
 
-        remotes.push_back(new RemoteController(centralPrefix + "2", intersectionPrefix + "2"));
-        remotes.push_back(new RemoteController(centralPrefix + "3", intersectionPrefix + "3"));
-        remotes.push_back(new RemoteController(centralPrefix + "1", intersectionPrefix + "1"));
-
+        /*create remote controllers*/
+        remotes.push_back(new RemoteController("/c1",
+            "/net/gridlock1/dev/mqueue/i1"));
+        remotes.push_back(new RemoteController("/c2",
+            "/net/gridlock1/dev/mqueue/i2"));
+        remotes.push_back(new RemoteController("/c3",
+            "/net/gridlock1/dev/mqueue/i3"));
 
         std::cout << "#1: " << remotes[0]->getIntersectionName() << "\n";
-        std::cout << "#1: " << remotes[1]->getIntersectionName() << "\n";
+        std::cout << "#2: " << remotes[1]->getIntersectionName() << "\n";
         std::cout << "#3: " << remotes[2]->getIntersectionName() << "\n";
 
+        /*create a thread for each remote*/
         for (unsigned int i = 0; i < remotes.size(); i++)
         {
-            //create a thread for each remote
-            std::cout << "Creating thread for " << remotes[i]->getIntersectionName() << "\n";
+            std::cerr << "Creating thread for " <<
+                remotes[i]->getIntersectionName() << "\n";
 
             if (pthread_create(&thread, NULL, remoteRunner, remotes[i]) != 0)
             {
-                //thread's resources will be released as soon as it closes
+                /*thread's resources will be released as soon as it closes*/
                 pthread_detach(thread);
-                std::cout << "Detaching " << remotes[i]->getIntersectionName() << "\n";
+                std::cerr << "Detaching " <<
+                    remotes[i]->getIntersectionName() << "\n";
             }
         }
 
-        //show the menu to the user (will block)
+        /*show the menu to the user (will block)*/
         centralMenu();
 
+        /*clean up*/
         quit = true;
-
         while (!remotes.empty())
         {
             delete remotes.back();
@@ -63,60 +67,61 @@ int main(int argc, char **argv) {
         }
 
     }
+
+    /*create intersection controller*/
     else if (strncmp(type, "intersection", strlen("intersection")) == 0)
     {
-        //if the user specified "intersectiont" then it's a tram intersection 
+        /*if the user specified "intersectiont" then it's a tram intersection*/
         int tram = ('t' == type[strlen("intersection")] ? TRAM : NOTRAM);
 
-        //create the IntersectionController
-        AbstractController *controller = 
-            new IntersectionController(tram, 
-                                       string(centralName),
-                                       string(intersectionName)
-                                      );
+        /*create the IntersectionController*/
+        AbstractController *controller = new IntersectionController(tram, 
+            string(centralName), string(intersectionName));
 
-        //set up sensors
+        /*set up sensors*/
         sensors.push_back(new Sensor(controller, 'q', SEN_NS_PED));
         sensors.push_back(new Sensor(controller, 'w', SEN_NS_STRAIGHT));
         sensors.push_back(new Sensor(controller, 'e', SEN_TRAM));
-
         sensors.push_back(new Sensor(controller, 'a', SEN_EW_PED));
         sensors.push_back(new Sensor(controller, 's', SEN_EW_STRAIGHT));
         sensors.push_back(new Sensor(controller, 'd', SEN_EW_RIGHT));
 
-        //create a thread to listen to STDIN for Sensors
+        /*create a thread to listen to STDIN for Sensors, thread's resources
+        will be released as soon as it closes*/
         pthread_create(&thread, NULL, sensorListener, NULL);
-        
-        //thread's resources will be released as soon as it closes
         pthread_detach(thread);
 
-        //start up the controller (will block)
+        /*start up the controller (will block)*/
         controller->tick();
 
-        //delete(controller);
+        /*delete(controller);*/
 
+        /*clean up*/
         quit = 1;
         while (!sensors.empty())
         {
             delete sensors.back();
             sensors.pop_back();
         }
+    }
 
-
-    } else {
+    /*invalid type*/
+    else
+    {
         std::cout << "Invalid type\n";
         exit(-1);
     }
-
-
 }
 
+/*main menu loop*/
 void GridLock::centralMenu()
 {
     int option;
 
-    do 
+    /*loop forever*/
+    while (1) 
     {
+        /*print menu*/
         printf("gridlock\n");
         printf("========\n");
         printf("1. Change mode (all intersections)\n");
@@ -124,8 +129,8 @@ void GridLock::centralMenu()
         printf("3. Monitor intersections\n");
         printf("-----------\n\n");
 
+        /*read option and call appropriate sub-menu*/
         option = readInt(0, 3);
-
         switch (option) {
             case 1:
                 changeMode(NULL);
@@ -137,12 +142,10 @@ void GridLock::centralMenu()
                 monitorIntersections();
                 break;
         }
-
-    } while (true);
-
-
+    }
 }
 
+/*read a single integer from stdin, validate input*/
 int GridLock::readInt(int min, int max)
 {
     char line[LINE_SIZE];
@@ -160,6 +163,7 @@ int GridLock::readInt(int min, int max)
 }
 
 
+/*sub menu to change a single controller to a new mode*/
 void GridLock::changeMode(RemoteController *remote)
 {
     printf("\n\n\n");
@@ -183,8 +187,8 @@ void GridLock::changeMode(RemoteController *remote)
             break;
         case 3:
             mode = COMMAND_MODE;
+            /*didn't select a command*/
             if ((command = selectCommand()) < 1)
-                //didn't select a command
                 return;
             else
                 if (NULL != remote)
@@ -207,6 +211,7 @@ void GridLock::changeMode(RemoteController *remote)
             remotes[i]->setFlag(mode);
 }
 
+/*set a controller to a new mode when in command mode*/
 int GridLock::selectCommand()
 {
     static const unsigned int range = CONTROLLER_FLAG_SENTINEL - 
@@ -230,6 +235,7 @@ int GridLock::selectCommand()
         return option;
 }
 
+/*list the available intersections*/
 void GridLock::showIntersections()
 {
     printf("\n\n\n");
@@ -245,12 +251,14 @@ void GridLock::showIntersections()
         intersectionMenu(remotes[(option - 1) % remotes.size()]);
 }
 
+/*unused*/
 void GridLock::monitorIntersections()
 {
     cout << "monitorIntersections\n";
 }
 
-
+/*allows the changing of mode or sequence for an already determined
+intersection*/
 void GridLock::intersectionMenu(RemoteController *remote)
 {
     printf("\n\n\n");
@@ -269,6 +277,7 @@ void GridLock::intersectionMenu(RemoteController *remote)
 
 }
 
+/*imodify the sequence of a pre-determined controller*/
 void GridLock::changeSequence(RemoteController *remote)
 {
     printf("\n\n\n");
@@ -281,15 +290,16 @@ void GridLock::changeSequence(RemoteController *remote)
 
     int i, j, option;
 
-    do {
-
+    do
+    {
         for (i = 0; i < range; i++) 
             printf("%d. Set %s\n", i + 1, controllerFlagNames[i + offset]);
 
         printf("- - - - - - - - - - \n");
 
         for (j = 0; j < range; j++) 
-            printf("%d. Clear %s\n", i + j + 1, controllerFlagNames[j + offset]);
+            printf("%d. Clear %s\n", i + j + 1, controllerFlagNames[j +
+                offset]);
 
         printf("- - - - - - - - - - \n");
 
@@ -299,24 +309,22 @@ void GridLock::changeSequence(RemoteController *remote)
         option = readInt(1, i + j);
 
         if (option > 0 && option <= i) 
-        {
             remote->setFlag(offset + option - 1);
-        }
         else if (option > i)
-        {
             remote->clearFlag(offset + option - 1 - i);
-        }
 
     } while (option > 0);
-
 }
 
-
+/*thread to run remote controller*/
 void *GridLock::remoteRunner(void *args) {
     RemoteController *remote = (RemoteController *)args;
 
-    std::cout << "new runner thread for " << remote->getIntersectionName() << "\n";
-    while (true) {
+    std::cerr << "new runner thread for " << remote->getIntersectionName()
+        << "\n";
+
+    while (true)
+    {
         sleep(1);
         remote->trigger();
     }
@@ -324,29 +332,34 @@ void *GridLock::remoteRunner(void *args) {
     return NULL;
 }
 
-void *GridLock::sensorListener(void *args) {
-
+/*thread to listen to each of the keys used to trigger the sensors in the
+intersection controllers*/
+void *GridLock::sensorListener(void *args)
+{
     char buff;
     unsigned int i;
 
-    while (read(STDIN_FILENO, &buff, 1) > 0 && !quit) {
-        for (i = 0; i < sensors.size(); i++) {
+    while (read(STDIN_FILENO, &buff, 1) > 0 && !quit)
+    {
+        for (i = 0; i < sensors.size(); i++)
+        {
+            /*there was a problem writing out to a pipe*/
             if (write(sensors[i]->getWriteFD(), &buff, 1) != 1)
             {
-                //there was a problem writing out to a pipe
                 cout << "Failed to write to pipe, exiting." << "\n";
                 break;
             }
         }
 
+        /*break must have been called*/
         if (i < sensors.size())
-            //break must have been called
             break;
     }
 
-    //clean up writeFDs
+    /*clean up writeFDs*/
     for (i = 0; i < sensors.size(); i++)
         close(sensors[i]->getWriteFD());
 
     return NULL;
 }
+

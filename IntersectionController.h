@@ -327,21 +327,22 @@ namespace ControllerInfo
     static const int EW_STRAIGHT_F_C_EXIT       = 0;
 }
 
-//constants for intersection type
+/*constants for intersection type*/
 #define TRAM 0
 #define NOTRAM 1
 
 class IntersectionController : public AbstractController
 {
+    /*constructor*/
     public:
-        //constructor
         IntersectionController(unsigned int type, 
                                const std::string &centralName,
                                const std::string &intersectionName);
 
-        //overriding abstract methods
+    /*member functions*/
+    public:
+        /*overriding abstract methods*/
         virtual void trigger();
-
         virtual void receiveMessage(char *sender, int header, int msg);
         virtual void clearFlag(unsigned int flag);
         virtual void setFlag(unsigned int flag);
@@ -349,50 +350,18 @@ class IntersectionController : public AbstractController
 
         void display();
 
-    private:
-        //instance variables
-        ControllerInfo::controllerState state;
-        unsigned int flags[ControllerInfo::CONTROLLER_FLAG_SENTINEL];
-
-        //a CONTROLLER_STATE_SENTINAL-element array of function pointers
-        void (IntersectionController::*stateRecord
-            [ControllerInfo::CONTROLLER_STATE_SENTINAL])();
-
-        //storage for lights
-        LightHandler *lightsNS;
-        LightHandler *lightsEW;
-
-        //storage for light and flash configurations for each state
-        Light::lightString lightFlagsNS[ControllerInfo::CONTROLLER_STATE_SENTINAL];
-        Light::lightString lightFlagsEW[ControllerInfo::CONTROLLER_STATE_SENTINAL];
-
-        Light::lightString flashFlagsNS[ControllerInfo::CONTROLLER_STATE_SENTINAL];
-        Light::lightString flashFlagsEW[ControllerInfo::CONTROLLER_STATE_SENTINAL];
-
-        //a map of bitStrings indicating which states to clear when exiting a state
-        int exitClearFlags[ControllerInfo::CONTROLLER_STATE_SENTINAL];
-
-        //type of intersection controller, TRAM for 'i2', NOTRAM for 'i1' or 'i3'
-        unsigned int type;
-
-        //queues
-        Queue *inQueue;
-        const char *intersectionName;
-        const char *centralName;
-
-    private:
-        virtual void transitionToState(ControllerInfo::controllerState state, int time);
+        virtual void transitionToState(ControllerInfo::controllerState state,
+            int time);
         virtual void clearFlags(int bitString);
         virtual void initialiseStates();
 
         void mapState(ControllerInfo::controllerState state,
-                      void (IntersectionController::*stateRecord)(), 
-                      Light::lightString lightFlagsNS, Light::lightString lightFlagsEW,
-                      Light::lightString flashFlagsNS, Light::lightString flashFlagsEW,
-                      int clearFlags
-                     );
+            void (IntersectionController::*stateRecord)(),
+            Light::lightString lightFlagsNS, Light::lightString lightFlagsEW, 
+            Light::lightString flashFlagsNS, Light::lightString flashFlagsEW,
+            int clearFlags);
 
-        //private state functions
+        /*private state functions*/
         virtual void startup();
         virtual void ns_clear();
         virtual void ns_tram_g();
@@ -410,6 +379,42 @@ class IntersectionController : public AbstractController
         virtual void ew_straight_g_ped_f();
         virtual void ew_straight_g();
         virtual void ew_straight_f();
+
+    /*instance variables*/
+    private:
+        ControllerInfo::controllerState state;
+        unsigned int flags[ControllerInfo::CONTROLLER_FLAG_SENTINEL];
+
+        /*a CONTROLLER_STATE_SENTINAL-element array of function pointers*/
+        void (IntersectionController::*stateRecord
+            [ControllerInfo::CONTROLLER_STATE_SENTINAL])();
+
+        /*storage for lights*/
+        LightHandler *lightsNS;
+        LightHandler *lightsEW;
+
+        /*storage for light and flash configurations for each state*/
+        Light::lightString lightFlagsNS[ControllerInfo::
+            CONTROLLER_STATE_SENTINAL];
+        Light::lightString lightFlagsEW[ControllerInfo::
+            CONTROLLER_STATE_SENTINAL];
+        Light::lightString flashFlagsNS[ControllerInfo::
+            CONTROLLER_STATE_SENTINAL];
+        Light::lightString flashFlagsEW[ControllerInfo::
+            CONTROLLER_STATE_SENTINAL];
+
+        /*a map of bitStrings indicating which states to clear when exiting a
+        state*/
+        int exitClearFlags[ControllerInfo::CONTROLLER_STATE_SENTINAL];
+
+        /*type of intersection controller, TRAM for 'i2', NOTRAM for 'i1' or
+        'i3'*/
+        unsigned int type;
+
+        /*queues*/
+        Queue *inQueue;
+        const char *intersectionName;
+        const char *centralName;
 };
 
 #endif

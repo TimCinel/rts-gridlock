@@ -41,25 +41,29 @@ typedef struct
 
 class Queue
 {
-
+    /*instance variables*/
     private:
-        pthread_t       t_thread;
-        char*           name;
-        struct mq_attr  attr;
-
-    public:
+        pthread_t t_thread;
+        char* name;
+        struct mq_attr attr;
         AbstractController* controller;
 
+    /*constructors*/
+    public:
         Queue(char*, AbstractController*);
         ~Queue();
 
+    /*member functions*/
+    public:
         char* get_name();
         struct mq_attr* getAttr();
         void set_name(char* name);
         AbstractController* getController();
 };
 
+/*thread functions, cannot be member functions*/
 void* read_queue(void* args);
 void write_queue(char*, int, char*, int);
 
 #endif
+

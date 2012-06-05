@@ -13,6 +13,7 @@ class AbstractController
 {
     /*functions*/
     public:
+        /*purely virtual, implemented by subclasses*/
         virtual void trigger() = 0;
         virtual void receiveMessage(char *sender, int header, int msg) = 0;
         virtual void clearFlag(unsigned int flag) = 0;
@@ -25,7 +26,6 @@ class AbstractController
         int getTime();
 
         void initClock();
-        void endClock();
 
         int getWaynesConstant();
         void setWaynesConstant(int);
@@ -41,6 +41,7 @@ class AbstractController
         int waynesConstant;
 };
 
+/*run in a seperate thread, cannot be a class member*/
 void* runClock(void*);
 
 #endif

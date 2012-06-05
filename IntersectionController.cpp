@@ -4,9 +4,8 @@
 
 using namespace ControllerInfo;
 
-IntersectionController::IntersectionController(unsigned int type, 
-                                               const std::string &centralName,
-                                               const std::string &intersectionName) 
+IntersectionController::IntersectionController(unsigned int type,
+    const std::string &centralName, const std::string &intersectionName) 
 {
     this->type = type;
     this->centralName = centralName.c_str();
@@ -20,7 +19,8 @@ IntersectionController::IntersectionController(unsigned int type,
     this->initClock();
 }
 
-void IntersectionController::receiveMessage(char *sender, int header, int msg) {
+void IntersectionController::receiveMessage(char *sender, int header, int msg)
+{
     if (header == SET_CONTROLLER_FLAG)
     {
         this->setFlag(msg);
@@ -40,7 +40,6 @@ void IntersectionController::trigger()
         (this->*stateRecord[this->state])();
     else
         (this->*stateRecord[STARTUP])();
-
 }
 
 void IntersectionController::setFlag(unsigned int flag)
@@ -114,7 +113,6 @@ void IntersectionController::ns_clear()
     else
         //no transition defined - crash
         this->transitionToState(STARTUP, T_STARTUP);
-
 }
 
 void IntersectionController::ns_tram_g()
@@ -125,7 +123,6 @@ void IntersectionController::ns_tram_g()
        )
         this->transitionToState(NS_TRAM_G, T_TRAM_G);
     this->transitionToState(NS_TRAM_F, T_TRAM_F);
-
 }
 
 void IntersectionController::ns_tram_f()
@@ -155,7 +152,6 @@ void IntersectionController::ns_straight()
     else
         //crash
         this->transitionToState(STARTUP, T_STARTUP);
-
 }
 
 void IntersectionController::ns_straight_g_ped_g()
@@ -176,13 +172,11 @@ void IntersectionController::ns_straight_g_ped_g()
     else
         //crash
         this->transitionToState(STARTUP, T_STARTUP);
-        
 }
 
 void IntersectionController::ns_straight_g_ped_f()
 {
     this->transitionToState(NS_STRAIGHT_G, T_NS_STRAIGHT_G_QUICK);
-
 }
 
 void IntersectionController::ns_straight_g()
@@ -194,13 +188,11 @@ void IntersectionController::ns_straight_g()
         this->transitionToState(NS_STRAIGHT_G, T_NS_STRAIGHT_G_QUICK);
     else
         this->transitionToState(NS_STRAIGHT_F, T_NS_STRAIGHT_F);
-
 }
 
 void IntersectionController::ns_straight_f()
 {
     this->transitionToState(EW_CLEAR, T_EW_CLEAR);
-
 }
 
 void IntersectionController::ew_clear()
@@ -231,7 +223,6 @@ void IntersectionController::ew_clear()
     else
         //crash
         this->transitionToState(STARTUP, T_STARTUP);
-
 }
 
 void IntersectionController::ew_both_right_g()
@@ -253,13 +244,11 @@ void IntersectionController::ew_both_right_g()
     else
         //crash
         this->transitionToState(STARTUP, T_STARTUP);
-
 }
 
 void IntersectionController::ew_both_right_f()
 {
     this->transitionToState(EW_STRAIGHT, T_EW_STRAIGHT);
-
 }
 
 void IntersectionController::ew_straight()
@@ -282,7 +271,6 @@ void IntersectionController::ew_straight()
     else
         //crash
         this->transitionToState(STARTUP, T_STARTUP);
-
 }
 
 void IntersectionController::ew_straight_g_ped_g()
@@ -303,7 +291,6 @@ void IntersectionController::ew_straight_g_ped_g()
     else
         //crash
         this->transitionToState(STARTUP, T_STARTUP);
-
 }
 
 void IntersectionController::ew_straight_g_ped_f()
@@ -318,6 +305,7 @@ void IntersectionController::ew_straight_g()
        this->getFlag(SENSOR_MODE) && this->getFlag(SEN_EW_PED)
        )
         this->transitionToState(EW_STRAIGHT_G_PED_G, T_EW_PED_G);
+
     else if (
        //EW_STRAIGHT_F guards
        this->getFlag(TIMER_MODE) ||
@@ -327,23 +315,23 @@ void IntersectionController::ew_straight_g()
        (this->getFlag(SENSOR_MODE) && this->getFlag(SEN_TRAM))
        )
         this->transitionToState(EW_STRAIGHT_F, T_EW_STRAIGHT_F);
+
     else if (
        //loop
        (this->getFlag(COMMAND_MODE) && this->getFlag(CMD_EW_STRAIGHT)) ||
        this->getFlag(SENSOR_MODE)
        )
         this->transitionToState(EW_STRAIGHT_G, T_EW_STRAIGHT_CHECK);
+
     else
         //crash
         this->transitionToState(STARTUP, T_STARTUP);
-
 }
 
 void IntersectionController::ew_straight_f()
 {
     this->transitionToState(NS_CLEAR, T_NS_CLEAR);
 }
-
 
 void IntersectionController::
 mapState(controllerState state,
@@ -434,7 +422,6 @@ void IntersectionController::display()
    printf("|       | %c %c %c |       |\n", ns_p, ns_t, ns);
    printf(" ----------------------- \n");
 }
-
 
 void IntersectionController::transitionToState(controllerState state, int time)
 {
@@ -594,12 +581,10 @@ void IntersectionController::initialiseStates()
              EW_STRAIGHT_F_F_NS, EW_STRAIGHT_F_F_EW, 
              EW_STRAIGHT_F_C_EXIT);
 
-
     //add some lights
     lightString lightConf;
     lightConf = (NOTRAM == this->type ?  I1_I3_NS_LIGHT_CONF : I2_NS_LIGHT_CONF);
     this->lightsNS = new LightHandler(lightConf);
-
 
     lightConf = (NOTRAM == this->type ?  I1_I3_EW_LIGHT_CONF : I2_EW_LIGHT_CONF);
     this->lightsEW = new LightHandler(lightConf);
@@ -619,6 +604,5 @@ void IntersectionController::initialiseStates()
 
     //initial state
     this->transitionToState(STARTUP, T_STARTUP);
-
 }
 
