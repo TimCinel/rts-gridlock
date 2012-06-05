@@ -89,7 +89,7 @@ void* read_queue(void* args)
         std::cerr << "dequeue: " << buf.header << ", " << buf.sender << ", " << buf.msg << "\n";
 
         /*pass message request to controller*/
-        queue->controller->receiveMessage(buf.sender, buf.header, buf.msg);
+        queue->getController()->receiveMessage(buf.sender, buf.header, buf.msg);
 
         /*close queue*/
         mq_close(qr);
