@@ -1,9 +1,9 @@
 #include "IntersectionController.h"
-
 #include "RemoteController.h"
 
 using namespace ControllerInfo;
 
+/*constructor*/
 IntersectionController::IntersectionController(unsigned int type,
     const std::string &centralName, const std::string &intersectionName) 
 {
@@ -11,7 +11,7 @@ IntersectionController::IntersectionController(unsigned int type,
     this->centralName = centralName.c_str();
     this->intersectionName = intersectionName.c_str();
 
-    //create state map
+    /*create state map*/
     this->initialiseStates();
 
     inQueue = new Queue((char *)this->intersectionName, this);
@@ -19,18 +19,17 @@ IntersectionController::IntersectionController(unsigned int type,
     this->initClock();
 }
 
+/*used when a message is received by the queue thread, sets or clears the flag
+specified to achieve the expected result*/
 void IntersectionController::receiveMessage(char *sender, int header, int msg)
 {
     if (header == SET_CONTROLLER_FLAG)
-    {
         this->setFlag(msg);
-    } 
     else if (header == CLEAR_CONTROLLER_FLAG)
-    {
         this->clearFlag(msg);
-    }
 }
 
+/*called each second, when the timer runs out this calls the state transition*/
 void IntersectionController::trigger()
 {
     if (this->getTime() > 0)
@@ -42,39 +41,45 @@ void IntersectionController::trigger()
         (this->*stateRecord[STARTUP])();
 }
 
+/*sets the flag specified, called when a message is received or a sensor is
+triggered*/
 void IntersectionController::setFlag(unsigned int flag)
 {
-    //TODO: Semaphore
+    /*TODO: Semaphore*/
     if (flag < CONTROLLER_COMMAND_SENTINEL)
-        //regular case - just set the flag
+        /*regular case - just set the flag*/
         this->flags[flag % CONTROLLER_FLAG_SENTINEL] = 1;
     else if (flag < CONTROLLER_FLAG_SENTINEL)
-        //special case for commands - hold only one integer value
+        /*special case for commands - hold only one integer value*/
         this->flags[SYSTEM_COMMAND] = flag;
     else
-        //special case for modes - hold only one integer value
+        /*special case for modes - hold only one integer value*/
         this->flags[SYSTEM_MODE] = flag;
 }
 
+/*accessor for flag, multiple cases as flag is stored in bit string*/
 int IntersectionController::getFlag(unsigned int flag) 
 {
-    //TODO: Semaphore
+    //TODO: Semaphore*/
     if (flag < CONTROLLER_COMMAND_SENTINEL)
-        //regular case - just set the flag
+        /*regular case - just set the flag*/
         return this->flags[flag % CONTROLLER_FLAG_SENTINEL];
     else if (flag < CONTROLLER_FLAG_SENTINEL)
-        //special case for commands - hold only one integer value
+        /*special case for commands - hold only one integer value*/
         return (this->flags[SYSTEM_COMMAND] == flag);
     else
-        //special case for modes - hold only one integer value
+        /*special case for modes - hold only one integer value*/
         return (this->flags[SYSTEM_MODE] == flag);
 }
 
+/*clears a flag, used when exiting a state in sensor mode or when exiting
+command mode*/
 void IntersectionController::clearFlag(unsigned int flag) {
-    //TODO: Semaphore
+    /*TODO: Semaphore*/
     this->flags[flag % CONTROLLER_FLAG_SENTINEL] = 0;
 }
 
+/*go to initial state at startup*/
 void IntersectionController::startup()
 {
     this->transitionToState(NS_CLEAR, T_NS_CLEAR);
@@ -333,6 +338,7 @@ void IntersectionController::ew_straight_f()
     this->transitionToState(NS_CLEAR, T_NS_CLEAR);
 }
 
+/*stores the state in the table when the intersection is created*/
 void IntersectionController::
 mapState(controllerState state,
          void (IntersectionController::*stateFunction)(), 
@@ -352,83 +358,92 @@ mapState(controllerState state,
     this->exitClearFlags[state] = clearFlags;
 }
 
+/*display the intersection in ascii art*/
 void IntersectionController::display()
 {
-   //vars north-south
-   unsigned char ns_g, ns_a, ns_r;
-   unsigned char ns_t_w, ns_t_a;
-   unsigned char ns_p_g, ns_p_r;
+    /*north-south light states*/
+    unsigned char ns_g, ns_a, ns_r;
+    unsigned char ns_t_w, ns_t_a;
+    unsigned char ns_p_g, ns_p_r;
 
-   lightsNS->getLights() & (1 << CAR_STRAIGHT_GO) ? ns_g = 'G' : ns_g = ' ';
-   lightsNS->getLights() & (1 << CAR_STRAIGHT_FINISH) ? ns_a = 'A' : ns_a = ' ';
-   lightsNS->getLights() & (1 << CAR_STRAIGHT_STOP) ? ns_r = 'R' : ns_r = ' ';
+    lightsNS->getLights() & (1 << CAR_STRAIGHT_GO) ? ns_g = 'G' : ns_g = ' ';
+    lightsNS->getLights() & (1 << CAR_STRAIGHT_FINISH) ? ns_a = 'A' : ns_a = ' ';
+    lightsNS->getLights() & (1 << CAR_STRAIGHT_STOP) ? ns_r = 'R' : ns_r = ' ';
 
-   lightsNS->getLights() & (1 << TRAM_GO) ? ns_t_w = 'W' : ns_t_w = ' ';
-   lightsNS->getLights() & (1 << TRAM_FINISH) ? ns_t_a = 'A' : ns_t_a = ' ';
+    lightsNS->getLights() & (1 << TRAM_GO) ? ns_t_w = 'W' : ns_t_w = ' ';
+    lightsNS->getLights() & (1 << TRAM_FINISH) ? ns_t_a = 'A' : ns_t_a = ' ';
 
-   lightsNS->getLights() & (1 << PEDESTRIAN_GO) ? ns_p_g = 'G' : ns_p_g = ' ';
-   lightsNS->getLights() & (1 << PEDESTRIAN_STOP) ? ns_p_r = 'R' : ns_p_r = ' ';
+    lightsNS->getLights() & (1 << PEDESTRIAN_GO) ? ns_p_g = 'G' : ns_p_g = ' ';
+    lightsNS->getLights() & (1 << PEDESTRIAN_STOP) ? ns_p_r = 'R' : ns_p_r = ' ';
 
-   //sensors north-south
-   unsigned char ns, ns_t, ns_p;
+    /*north-south sensor states*/
+    unsigned char ns, ns_t, ns_p;
 
-   flags[SEN_NS_STRAIGHT] ? ns = 'X' : ns = ' ';
-   flags[SEN_TRAM] ? ns_t = 'X' : ns_t = ' ';
-   flags[SEN_NS_PED] ? ns_p = 'X' : ns_p = ' ';
+    flags[SEN_NS_STRAIGHT] ? ns = 'X' : ns = ' ';
+    flags[SEN_TRAM] ? ns_t = 'X' : ns_t = ' ';
+    flags[SEN_NS_PED] ? ns_p = 'X' : ns_p = ' ';
 
-   //vars east-west
-   unsigned char ew_g, ew_a, ew_r;
-   unsigned char ew_t_g, ew_t_a;
-   unsigned char ew_p_g, ew_p_r;
+    /*east-west light states*/
+    unsigned char ew_g, ew_a, ew_r;
+    unsigned char ew_t_g, ew_t_a;
+    unsigned char ew_p_g, ew_p_r;
 
-   lightsEW->getLights() & (1 << CAR_STRAIGHT_GO) ? ew_g = 'G' : ew_g = ' ';
-   lightsEW->getLights() & (1 << CAR_STRAIGHT_FINISH) ? ew_a = 'A' : ew_a = ' ';
-   lightsEW->getLights() & (1 << CAR_STRAIGHT_STOP) ? ew_r = 'R' : ew_r = ' ';
+    lightsEW->getLights() & (1 << CAR_STRAIGHT_GO) ? ew_g = 'G' : ew_g = ' ';
+    lightsEW->getLights() & (1 << CAR_STRAIGHT_FINISH) ? ew_a = 'A' :
+        ew_a = ' ';
+    lightsEW->getLights() & (1 << CAR_STRAIGHT_STOP) ? ew_r = 'R' : ew_r = ' ';
 
-   lightsEW->getLights() & (1 << CAR_RIGHT_GO) ? ew_t_g = 'G' : ew_t_g = ' ';
-   lightsEW->getLights() & (1 << CAR_RIGHT_FINISH) ? ew_t_a = 'A' : ew_t_a = ' ';
+    lightsEW->getLights() & (1 << CAR_RIGHT_GO) ? ew_t_g = 'G' : ew_t_g = ' ';
+    lightsEW->getLights() & (1 << CAR_RIGHT_FINISH) ? ew_t_a = 'A' :
+        ew_t_a = ' ';
 
-   lightsEW->getLights() & (1 << PEDESTRIAN_GO) ? ew_p_g = 'G' : ew_p_g = ' ';
-   lightsEW->getLights() & (1 << PEDESTRIAN_STOP) ? ew_p_r = 'R' : ew_p_r = ' ';
+    lightsEW->getLights() & (1 << PEDESTRIAN_GO) ? ew_p_g = 'G' : ew_p_g = ' ';
+    lightsEW->getLights() & (1 << PEDESTRIAN_STOP) ? ew_p_r = 'R' :
+        ew_p_r = ' ';
 
-   //sensors east-west
-   unsigned char ew, ew_t, ew_p;
+    /*east-west sensor states*/
+    unsigned char ew, ew_t, ew_p;
 
-   flags[SEN_EW_STRAIGHT] ? ew = 'X' : ew = ' ';
-   flags[SEN_EW_RIGHT] ? ew_t = 'X' : ew_t = ' ';
-   flags[SEN_EW_PED] ? ew_p = 'X' : ew_p = ' ';
+    flags[SEN_EW_STRAIGHT] ? ew = 'X' : ew = ' ';
+    flags[SEN_EW_RIGHT] ? ew_t = 'X' : ew_t = ' ';
+    flags[SEN_EW_PED] ? ew_p = 'X' : ew_p = ' ';
 
-   printf(" ----------------------- \n");
-   printf("|       | %c %c %c |       |\n", ns, ns_t, ns_p);
-   printf("|       | - - - |       |\n");
-   printf("|       ||%c|%c|%c||       |\n", ns_g, ns_t_w, ns_p_g);
-   printf("|       ||%c|%c|%c||       |\n", ns_a, ns_t_a, ns_p_r);
-   printf("|       ||%c|- - |       |\n", ns_r);
-   printf("|       | -     |       |\n");
-   printf("|-----------------------|\n");
-   printf("|  --   |       |  ---  |\n");
-   printf("|%c|%c%c|  |       | |%c%c%c|%c|\n", ew_p, ew_p_g, ew_p_r, ew_r, ew_a, ew_g, ew);
-   printf("|  --   |       |  ---  |\n");
-   printf("|%c|%c%c|  |       |  |%c%c|%c|\n", ew_t, ew_t_a, ew_t_g, ew_t_g, ew_t_a, ew_t);
-   printf("|  ---  |       |   --  |\n");
-   printf("|%c|%c%c%c| |       |  |%c%c|%c|\n", ew, ew_g, ew_a, ew_r, ew_p_r, ew_p_g, ew_p);
-   printf("|  ---  |       |   --  |\n");
-   printf("|-----------------------|\n");
-   printf("|       |     - |       |\n");
-   printf("|       | - -|%c||       |\n", ns_r);
-   printf("|       ||%c|%c|%c||       |\n", ns_p_r, ns_t_a, ns_a);
-   printf("|       ||%c|%c|%c||       |\n", ns_p_g, ns_t_w, ns_g);
-   printf("|       | - - - |       |\n");
-   printf("|       | %c %c %c |       |\n", ns_p, ns_t, ns);
-   printf(" ----------------------- \n");
+    /*output*/
+    printf(" ----------------------- \n");
+    printf("|       | %c %c %c |       |\n", ns, ns_t, ns_p);
+    printf("|       | - - - |       |\n");
+    printf("|       ||%c|%c|%c||       |\n", ns_g, ns_t_w, ns_p_g);
+    printf("|       ||%c|%c|%c||       |\n", ns_a, ns_t_a, ns_p_r);
+    printf("|       ||%c|- - |       |\n", ns_r);
+    printf("|       | -     |       |\n");
+    printf("|-----------------------|\n");
+    printf("|  --   |       |  ---  |\n");
+    printf("|%c|%c%c|  |       | |%c%c%c|%c|\n", ew_p, ew_p_g, ew_p_r, ew_r,
+        ew_a, ew_g, ew);
+    printf("|  --   |       |  ---  |\n");
+    printf("|%c|%c%c|  |       |  |%c%c|%c|\n", ew_t, ew_t_a, ew_t_g, ew_t_g,
+        ew_t_a, ew_t);
+    printf("|  ---  |       |   --  |\n");
+    printf("|%c|%c%c%c| |       |  |%c%c|%c|\n", ew, ew_g, ew_a, ew_r, ew_p_r,
+        ew_p_g, ew_p);
+    printf("|  ---  |       |   --  |\n");
+    printf("|-----------------------|\n");
+    printf("|       |     - |       |\n");
+    printf("|       | - -|%c||       |\n", ns_r);
+    printf("|       ||%c|%c|%c||       |\n", ns_p_r, ns_t_a, ns_a);
+    printf("|       ||%c|%c|%c||       |\n", ns_p_g, ns_t_w, ns_g);
+    printf("|       | - - - |       |\n");
+    printf("|       | %c %c %c |       |\n", ns_p, ns_t, ns);
+    printf(" ----------------------- \n");
 }
 
+/*move to new state, uses function pointer array and enums*/
 void IntersectionController::transitionToState(controllerState state, int time)
 {
-    //clear any relevant flags before exiting current state
+    /*clear any relevant flags before exiting current state*/
     this->clearFlags(this->exitClearFlags[this->state]);
 
-    //set lights
+    /*set lights*/
     this->lightsNS->setState(this->lightFlagsNS[state], 
                              this->flashFlagsNS[state]);
 
@@ -440,22 +455,21 @@ void IntersectionController::transitionToState(controllerState state, int time)
 
     std::cout << "Transition to state: " << controllerStateNames[state] << "\n";
 
-
-    //notify any remotes
-
     char *dest = (char *)this->centralName;
     char *noString = (char *)"";
 
-    //build a bitstring from our flags
+    /*build a bitstring from our flags*/
     int flags = 0;
     for (int i = 0; i < CONTROLLER_MODE_SENTINEL; i++)
         if (this->flags[i])
             flags &= (1 << i);
 
+    /*notify central controller*/
     write_queue(dest, RemoteInfo::NOTIFY_STATE, noString, (int)state);
     write_queue(dest, RemoteInfo::NOTIFY_FLAGS, noString, flags);
 }
 
+/*clear all mode flags*/
 void IntersectionController::clearFlags(int bitString)
 {
     for (unsigned int i = 0; i < CONTROLLER_FLAG_SENTINEL; i++)
@@ -467,14 +481,16 @@ void IntersectionController::clearFlags(int bitString)
         }
 }
 
+/*initialise the intersection states, set the function pointers for each valid
+state*/
 void IntersectionController::initialiseStates() 
 {
     std::cerr << "initialiseStates\n";
 
-    //clear all flags 
+    /*clear all flags */
     this->clearFlags(0xFFFF);
 
-    //populate state map
+    /*populate state maps*/
     mapState(STARTUP, &IntersectionController::startup, 
              STARTUP_L_NS, STARTUP_L_EW, 
              STARTUP_F_NS, STARTUP_F_EW, 
@@ -581,18 +597,20 @@ void IntersectionController::initialiseStates()
              EW_STRAIGHT_F_F_NS, EW_STRAIGHT_F_F_EW, 
              EW_STRAIGHT_F_C_EXIT);
 
-    //add some lights
+    /*add some lights*/
     lightString lightConf;
-    lightConf = (NOTRAM == this->type ?  I1_I3_NS_LIGHT_CONF : I2_NS_LIGHT_CONF);
+    lightConf = (NOTRAM == this->type ?  I1_I3_NS_LIGHT_CONF :
+        I2_NS_LIGHT_CONF);
     this->lightsNS = new LightHandler(lightConf);
 
-    lightConf = (NOTRAM == this->type ?  I1_I3_EW_LIGHT_CONF : I2_EW_LIGHT_CONF);
+    lightConf = (NOTRAM == this->type ?  I1_I3_EW_LIGHT_CONF :
+        I2_EW_LIGHT_CONF);
     this->lightsEW = new LightHandler(lightConf);
 
-    //default to sequence mode
+    /*default to sequence mode*/
     this->setFlag(TIMER_MODE);
 
-    //default sequence
+    /*set default sequence, determined by order set by the setFlag function*/
     if (type == TRAM)
         this->setFlag(SEQ_TRAM);
     this->setFlag(SEQ_NS_STRAIGHT);
@@ -602,7 +620,7 @@ void IntersectionController::initialiseStates()
     this->setFlag(SEQ_EW_STRAIGHT);
     this->setFlag(SEQ_EW_PED);
 
-    //initial state
+    /*initial state*/
     this->transitionToState(STARTUP, T_STARTUP);
 }
 

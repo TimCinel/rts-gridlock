@@ -8,19 +8,21 @@ using namespace GridLock;
 int main(int argc, char **argv)
 {
     /*test for command line arguments*/
-    if (argc != 2)
+    if (argc != 4)
     {
         std::cout << "Invalid arguments\n";
         exit(-1);
     }
 
-    char *name = argv[1];
+    char *type = argv[1];
+    centralName = argv[2];
+    intersectionName = argv[3];
 
     /*used when creating RemoteController and IntersectionController*/
     pthread_t thread;
 
     /*create central controller*/
-    if (strcmp(name, "central") == 0)
+    if (strcmp(type, "central") == 0)
     {
         /*create monitors to monitor intersection instances*/
         string centralPrefix = string(centralName);
@@ -67,19 +69,14 @@ int main(int argc, char **argv)
     }
 
     /*create intersection controller*/
-    else if (strncmp(name, "i1", strlen("i1")) == 0 ||
-        strncmp(name, "i2", strlen("i2")) == 0 ||
-        strncmp(name, "i3", strlen("i3")) == 0)
+    else if (strncmp(type, "intersection", strlen("intersection")) == 0)
     {
         /*if the user specified "intersectiont" then it's a tram intersection*/
-        int tram = (strncmp(name, "i2", strlen("i2")) == 0 ? TRAM : NOTRAM);
-
-        std::string cname = "/net/gridlock4/dev/mqueue/c" + *(name+1);
-        std::string iname = "/" + *(name);
+        int tram = ('t' == type[strlen("intersection")] ? TRAM : NOTRAM);
 
         /*create the IntersectionController*/
         AbstractController *controller = new IntersectionController(tram, 
-            cname, iname);
+            string(centralName), string(intersectionName));
 
         /*set up sensors*/
         sensors.push_back(new Sensor(controller, 'q', SEN_NS_PED));
@@ -96,6 +93,8 @@ int main(int argc, char **argv)
 
         /*start up the controller (will block)*/
         controller->tick();
+
+        /*delete(controller);*/
 
         /*clean up*/
         quit = 1;

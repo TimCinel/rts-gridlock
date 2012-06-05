@@ -1,6 +1,7 @@
 #ifndef SENSOR_H
 #define SENSOR_H
 
+/*for testing*/
 #ifndef MOCK_OBJECTS
     #include "AbstractController.h"
 #else
@@ -24,7 +25,8 @@ class Sensor
 
     /*constructors*/
     public:
-        Sensor(AbstractController *target, char trigger, int flagPosition, int readFD);
+        Sensor(AbstractController *target, char trigger, int flagPosition,
+            int readFD);
         Sensor(AbstractController *target, char trigger, int flagPosition);
         ~Sensor();
 

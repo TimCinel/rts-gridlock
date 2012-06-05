@@ -3,11 +3,11 @@
 
 #include <cstdio>
 
-namespace Light {
-
+namespace Light
+{
     typedef unsigned int lightString; 
 
-    //all light options
+    /*all light options*/
     typedef enum {
         CAR_STRAIGHT_STOP,
         CAR_STRAIGHT_FINISH,
@@ -21,7 +21,7 @@ namespace Light {
         LIGHTOPTION_SENTINEL
     } lightOption;
 
-    //conveniently-grouped light options
+    /*conveniently-grouped light options*/
     static const lightString CAR_STRAIGHT   = (1 << CAR_STRAIGHT_GO) | 
                                               (1 << CAR_STRAIGHT_FINISH) | 
                                               (1 << CAR_STRAIGHT_STOP);
@@ -38,33 +38,36 @@ namespace Light {
     static const lightString ALL_STOP       = (1 << CAR_STRAIGHT_STOP) |
                                               (1 << PEDESTRIAN_STOP);
 
-    //for convenience (using inline instead of macro)
+    /*for convenience (using inline instead of macro)*/
     inline unsigned int bit(unsigned int x) { return (1 << (x)); }
-
 }
 
 using namespace Light;
 
-class LightHandler {
-private:
+class LightHandler
+{
+    /*instance variables*/
+    private:
+        lightString lightConfiguration;
 
-    lightString lightConfiguration;
+        lightString lightFlags;
+        lightString flashFlags;
 
-    lightString lightFlags;
-    lightString flashFlags;
+    /*costructors*/
+    public:
+        LightHandler();
+        LightHandler(lightString lightConfiguration);
 
-public:
+    /*member functions*/
+    public:
+        void setState(lightString lights, lightString flashes);
 
-    LightHandler();
-    LightHandler(lightString lightConfiguration);
+        lightString getConfiguration();
+        lightString getLights();
+        lightString getFlashes();
 
-    void setState(lightString lights, lightString flashes);
-
-    lightString getConfiguration();
-    lightString getLights();
-    lightString getFlashes();
-
-    void printState();
+        void printState();
 };
 
 #endif
+

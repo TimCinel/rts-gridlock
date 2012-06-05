@@ -32,6 +32,7 @@
 #define READ 0
 #define WRITE 1
 
+/*used to store messages when passing via the queue*/
 typedef struct
 {
     int header;

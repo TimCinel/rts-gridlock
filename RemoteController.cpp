@@ -3,8 +3,9 @@
 using namespace RemoteInfo;
 using namespace ControllerInfo;
 
+/*constructor*/
 RemoteController::RemoteController(std::string centralName, 
-                                   std::string intersectionName)
+    std::string intersectionName)
 {
     this->centralName = (char *)(new char[MAX_NAME_LEN]);
     this->intersectionName = (char *)(new char[MAX_NAME_LEN]);
@@ -12,15 +13,27 @@ RemoteController::RemoteController(std::string centralName,
     strncpy(this->centralName, centralName.c_str(), MAX_NAME_LEN);
     strncpy(this->intersectionName, intersectionName.c_str(), MAX_NAME_LEN);
 
-    //create a Queue and receive messages from the intersection
-    this->incoming = NULL;
+    /*create queue*/
     this->incoming = new Queue((char *)this->centralName, this);
 }
 
+/*destructor*/
 RemoteController::~RemoteController()
 {
     if (this->incoming)
         delete this->incoming;
+}
+
+/*accessor*/
+char* RemoteController::getCentralName()
+{
+    return this->centralName;
+}
+
+/*accessor*/
+char* RemoteController::getIntersectionName()
+{
+    return this->intersectionName;
 }
 
 void RemoteController::trigger() {
@@ -109,38 +122,42 @@ void RemoteController::clearFlag(unsigned int flag)
     std::cout << "The flag `" << controllerFlagNames[flag] << "` has been cleared\n";
 }
 
+/*set the flag selected. called when a sensor is triggered or a command mode is
+set*/
 void RemoteController::setFlag(unsigned int flag)
 {
-    //TODO: Semaphore down
+    /*TODO: Semaphore down*/
  
-    //sets bit in flagsToSet
+    /*sets bit in flagsToSet*/
     this->flagsToSet |= (1 << flag);
 
-    //remove from flagsToClear
+    /*remove from flagsToClear*/
     this->flagsToClear &= ~(1 << flag);
 
-    //TODO: Semaphore up
+    /*TODO: Semaphore up*/
 
-    std::cout << "The flag `" << controllerFlagNames[flag] << "` (" << flag <<
-                 ") has been set\n";
+    std::cerr << "The flag `" << controllerFlagNames[flag] << "` (" << flag <<
+        ") has been set\n";
 
-    //the flag being set is a mode-setting one, update 'mode' accordingly
+    /*the flag being set is a mode-setting one, update 'mode' accordingly*/
     if (flag > CONTROLLER_FLAG_SENTINEL && flag < CONTROLLER_MODE_SENTINEL)
     {
-        std::cout << "The mode has been changed to " << controllerFlagNames[flag] << "\n";
+        std::cout << "The mode has been changed to " <<
+            controllerFlagNames[flag] << "\n";
         this->mode = flag;
     }
-
 }
 
+/*accessor, unused*/
 int RemoteController::getFlag(unsigned int flag)
 {
-    //doesn't do anything
     return 0;
 }
 
+/*displays remote controller state, unused*/
 void RemoteController::display()
 {
-    //TODO: Implement this
+    /*TODO: Implement this*/
     std::cout << "IMPLEMENT ME!\n";
 }
+
