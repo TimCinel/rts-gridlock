@@ -121,7 +121,7 @@ void write_queue(char *dest, int header, char* sender, int msg)
     cast_msg = (char*)&message;
     
     /*open queue*/
-    if ((qs = mq_open(dest, Q_FLAGS, Q_PERM, &attr)) >= 0)
+    if ((qs = mq_open(dest, Q_S_FLAGS, Q_PERM, &attr)) >= 0)
     {
         /*send the message, check for error*/
         if (mq_send(qs, cast_msg, sizeof(message), 0) < 0)
