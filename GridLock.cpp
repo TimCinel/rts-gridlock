@@ -8,25 +8,23 @@ using namespace GridLock;
 int main(int argc, char **argv)
 {
     /*test for command line arguments*/
-    if (argc != 4)
+    if (argc != 4 && argc != 2)
     {
         std::cout << "Invalid arguments\n";
         exit(-1);
     }
 
     char *type = argv[1];
-    centralName = argv[2];
-    intersectionName = argv[3];
 
     /*used when creating RemoteController and IntersectionController*/
     pthread_t thread;
 
     /*create central controller*/
-    if (strcmp(type, "central") == 0)
+    if (strcmp(type, "central") == 0 && argc == 2)
     {
         /*create monitors to monitor intersection instances*/
-        string centralPrefix = string(centralName);
-        string intersectionPrefix = string(intersectionName);
+        /*string centralPrefix = string(centralName);
+        string intersectionPrefix = string(intersectionName);*/
 
         /*create remote controllers*/
         remotes.push_back(new RemoteController("/c1",
@@ -71,6 +69,9 @@ int main(int argc, char **argv)
     /*create intersection controller*/
     else if (strncmp(type, "intersection", strlen("intersection")) == 0)
     {
+        centralName = argv[2];
+        intersectionName = argv[3];
+
         /*if the user specified "intersectiont" then it's a tram intersection*/
         int tram = ('t' == type[strlen("intersection")] ? TRAM : NOTRAM);
 

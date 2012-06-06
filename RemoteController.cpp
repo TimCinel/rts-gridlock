@@ -85,7 +85,10 @@ void RemoteController::receiveMessage(char *sender, int header, int msg)
         case NOTIFY_FLAGS:
             //remote intersection has sent its flags
 
-            std::cout << this->intersectionName << " flags: " << msg << "\n";
+            std::cout << this->intersectionName << " flags: ";
+            for (int i = 0; i < sizeof(int) * 8; i++)
+                printf("%d", (msg >> i) & 1);
+            std::cout << "\n";
             this->remoteFlags = msg;
 
             break;
