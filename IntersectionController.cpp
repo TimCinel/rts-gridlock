@@ -8,8 +8,8 @@ IntersectionController::IntersectionController(unsigned int type,
     const std::string &centralName, const std::string &intersectionName) 
 {
     this->type = type;
-    this->centralName = centralName.c_str();
-    this->intersectionName = intersectionName.c_str();
+    strcpy(this->centralName, centralName.c_str());
+    strcpy(this->intersectionName, intersectionName.c_str());
 
     /*create state map*/
     this->initialiseStates();

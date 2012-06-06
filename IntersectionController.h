@@ -318,6 +318,9 @@ namespace ControllerInfo
 #define TRAM 0
 #define NOTRAM 1
 
+/*size of mqueue path and name*/
+#define NAME_SIZE 30
+
 class IntersectionController : public AbstractController
 {
     /*constructor*/
@@ -400,8 +403,8 @@ class IntersectionController : public AbstractController
 
         /*queues*/
         Queue *inQueue;
-        const char *intersectionName;
-        const char *centralName;
+        char intersectionName[NAME_SIZE];
+        char centralName[NAME_SIZE];
 };
 
 #endif
