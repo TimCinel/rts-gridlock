@@ -462,7 +462,7 @@ void IntersectionController::transitionToState(controllerState state, int time)
     int flags = 0;
     for (int i = 0; i < CONTROLLER_MODE_SENTINEL; i++)
         if (this->flags[i])
-            flags &= (1 << i);
+            flags |= (1 << i);
 
     /*notify central controller*/
     write_queue(dest, RemoteInfo::NOTIFY_STATE, noString, (int)state);
