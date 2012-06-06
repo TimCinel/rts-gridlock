@@ -4,11 +4,11 @@
 
 using namespace ControllerInfo;
 
+/*used to test controller, operations are all performed by the controller
+object*/
 int main() {
-    IntersectionController *controller = new IntersectionController(TRAM, "wawaw");
-
-    //controller->setFlag(COMMAND_MODE);
-    //controller->setFlag(CMD_EW_STRAIGHT);
+    IntersectionController *controller = new IntersectionController(TRAM,
+        "wawaw");
 
     controller->tick();
 

@@ -3,17 +3,25 @@
 #define CONTROLLER_H
 
 class AbstractController {
-private:
-    int sensorFlags;
-public:
-    AbstractController() { sensorFlags = 0; }
+    /*instance variables*/
+    private:
+        int sensorFlags;
 
-    void setFlag(int flagPosition) {
+    /*constructor*/
+    public:
+        AbstractController()
+        {
+            sensorFlags = 0;
+        }
 
-        sensorFlags |= 1 << flagPosition;
-
-        std::cout << "\nFlag set: " << flagPosition << "\n";
-    };
+    /*member functions - defined inline as class is only for testing*/
+    public:
+        void setFlag(int flagPosition)
+        {
+            sensorFlags |= 1 << flagPosition;
+            std::cout << "\nFlag set: " << flagPosition << "\n";
+        };
 };
 
 #endif
+
