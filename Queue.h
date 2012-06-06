@@ -23,6 +23,7 @@
 #define MESSAGESIZE 28
 #define SENDERSIZE 20
 #define Q_FLAGS     O_RDWR | O_CREAT
+#define Q_S_FLAGS   Q_FLAGS | O_NONBLOCK
 #define Q_PERM      S_IRUSR | S_IWUSR | S_IROTH
 
 #define MODE_CHANGE    1
